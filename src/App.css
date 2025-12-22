@@ -1,0 +1,25 @@
+.sidebar {
+  position: relative;
+  left: 15%;
+  top: 10px;
+  background-color: rgb(131, 134, 118);
+  margin: 10px;
+  padding: 10px;
+}
+
+.main-content {
+  position: relative;
+  left: 15%;
+  top: 10px;
+  background-color: rgb(131, 134, 118);
+  margin: 10px;
+  padding: 10px;
+}
+.header {
+  position: relative;
+  left: 15%;
+  top: 10px;
+  background-color: rgb(131, 134, 118);
+  margin: 10px;
+  padding: 10px;
+}
