@@ -1,11 +1,11 @@
 import React from "react";
 
 // Components
-import Login from "../app/login";
-import Profile from "../app/profile";
-import MyPage from "../app/myPage";
-import Setting from "../app/setting";
-import CustomService from "../app/customService";
+import Login from "../pages/login";
+import Profile from "../pages/profile";
+import MyPage from "../pages/myPage";
+import Setting from "../pages/setting";
+import CustomService from "../pages/customService";
 
 export default function Sidebar() {
 

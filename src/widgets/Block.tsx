@@ -1,7 +1,7 @@
 import { useState } from "react";
-
-
-function Block() {
+import tailwindcss from "@tailwindcss/vite";
+// import Style from "../styles/Block.module.css";
+const Block = () => {
 
     const [title, setTitle]= useState("Block Title"); 
     const [edit, setEdit]= useState("Edit");
@@ -10,9 +10,10 @@ function Block() {
 
     return (
         <>
-            <div className="block-header">
+            <div>
                 <h2 id="block-head-title">{title}</h2>
             </div>  
+
             <div className="block-body">
                 <textarea name="" id=""></textarea>
             </div>

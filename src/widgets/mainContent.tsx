@@ -1,7 +1,7 @@
 import React from "react";
 
-import Canvas from "../app/canvas";
-import Block from "../app/Block";
+import Canvas from "../pages/canvas";
+import Block from "./Block";
 
 export default function MainContent() {
     return (
