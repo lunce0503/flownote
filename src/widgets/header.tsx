@@ -1,22 +1,31 @@
-import React from "react";
-import home from'../shared/assets/home.png';
-import blog from '../shared/assets/blog.png';
-import books from '../shared/assets/books.png';
+import React,{ useRef } from "react";
+import Menu from "../shared/assets/menu.svg";
+
 
 export default function Header() {
+    const headerTitle = useRef<HTMLDivElement>(null);
+
+    const onMenuClick = () => {
+        console.log("Menu clicked");
+    }
+
     return (
-        <>
-            <h1>FlowNote</h1>
-            <div className="header-hotbar">
-                {/* <a href="./">Home</a>
-                <a href="./blog">Blog<a>
-                <a href="./">Home</a>
-                <a href="./">Home</a> */}
-                <img src={home} style={{ width: '50px', height: 'auto' }}/>
-                <img src={blog} alt="blog-icon" style={{ width: '50px', height: 'auto' }}/>
-                <img src={books} alt="books-icon" style={{ width: '50px', height: 'auto' }}/>
+        <div className="w-full h-1/5 flex flex-row justify-start space-x-4 bg-amber-100 py-2">
+            <div onClick={onMenuClick} className="sidebar-toggle ml-5">
+                <img src={Menu} alt="menu" />
             </div>
-            <br />
-        </>
+            <div ref={headerTitle} className="header-title text-2xl text-stone-800 ml-5 font-mono">
+                Flownote
+            </div>
+            <div className="text-stone-600 hover:underline hover:text-stone-600">
+                <a className="text-inherit" href="/">Home</a>
+            </div>
+            <div className="text-stone-600 hover:underline hover:text-stone-600">
+                <a className="text-inherit" href="/blog">Blog</a>
+            </div>
+            <div className="text-stone-600 hover:underline hover:text-stone-600">
+                <a className="text-inherit" href="/libary">Libary</a>
+            </div>
+        </div>
     );
 } 

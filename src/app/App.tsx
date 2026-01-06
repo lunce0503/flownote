@@ -1,34 +1,47 @@
-import React, { useRef, useState } from 'react'
-import './App.css'
+import React, { useRef, useState } from 'react';
+import {BrowserRouter, Routes,Route } from 'react-router-dom';
+import './App.css';
 
-import Header from '../widgets/header'
-import MainContent from '../widgets/mainContent'
-import Sidebar from '../widgets/sidebar'
-import Magic from './magic/magic'
-import { count } from 'console'
+import Header from '../widgets/header';
+import MainContent from '../widgets/mainContent';
+import Sidebar from '../widgets/sidebar';
+import Magic from './routers/magic/magic';
 
-function App() {
-  
+import Home from './routers/Home';
+import Blog from './routers/Blog/Blog';
+import Books from './routers/Libary/Books';
+// import { GoogleGenAI } from "@google/genai";
 
+// const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+// const ai = new GoogleGenAI({apiKey: API_KEY});
+
+// async function main() {
+//   const response = await ai.models.generateContent({
+//     model: "gemini-2.5-flash",
+//     contents: "오늘은 무엇을 할까?",
+//   });
+//   console.log(response.text);
+// }
+
+// main();
+
+const App = () => {
   return (
-    <>
-      {/* 마법을 그리는 웹 페이지*/}
-      <div>
-        <Magic />
+    <div className='App'>
+      <div className='w-full'>
+        <BrowserRouter>
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/magic" element={<Magic />} />
+            <Route path="/blog" element={<Blog />}></Route>
+            {/* <Route path="/books" element={<Books />}></Route> */}
+          </Routes>
+            
+        </BrowserRouter>
       </div>
+    </div>
+  );
+};
 
-      
-      {/* <div className="w-full h-32 p-1 m-10 bg-amber-100 text-neutral-950">
-        <Header />
-      </div>
-      <div className="w-full h-32 p-10 m-10 bg-amber-100 text-neutral-950">
-        <MainContent />
-      </div>
-      <div className="w-full h-32 p-10 m-10 bg-amber-100 text-neutral-950">
-        <Sidebar />
-      </div> */}
-    </>
-  )
-}
-
-export default App
+export default App;

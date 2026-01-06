@@ -1,16 +1,14 @@
 import React from "react";
 
 import Canvas from "../pages/canvas";
-import Block from "./Block";
+import Block from "../app/routers/Blog/BlogBlock";
+import BlogNote from "../app/routers/Blog/BlogNote";
+
 
 export default function MainContent() {
     return (
-        <>  
-            <div className="skedule-viewer">
-                <h3>Schedule Viewer</h3>
-            </div>
-            <Canvas />
-            <Block />
-        </>
+        <div>
+            <BlogNote />  
+        </div>
     );
 }
