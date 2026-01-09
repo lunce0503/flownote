@@ -5,7 +5,7 @@ import './App.css';
 import Header from '../widgets/header';
 import MainContent from '../widgets/mainContent';
 import Sidebar from '../widgets/sidebar';
-import Magic from './routers/Magic/magic.tsx';
+import Magic from './routers/magic/magic.tsx';
 
 import Home from './routers/Home';
 import Blog from './routers/Blog/Blog';
