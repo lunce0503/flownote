@@ -15,16 +15,13 @@ export default function Header() {
                 <img src={Menu} alt="menu" />
             </div>
             <div ref={headerTitle} className="header-title text-2xl text-stone-800 ml-5 font-mono">
-                Flownote
+                <a className ="text-inherit hover:text-inherit" href="/">Flownote</a>
             </div>
-            <div className="text-stone-600 hover:underline hover:text-stone-600">
-                <a className="text-inherit" href="/">Home</a>
+            <div className="text-stone-600">
+                <a className="text-inherit hover:text-inherit" href="/blog">Blog</a>
             </div>
-            <div className="text-stone-600 hover:underline hover:text-stone-600">
-                <a className="text-inherit" href="/blog">Blog</a>
-            </div>
-            <div className="text-stone-600 hover:underline hover:text-stone-600">
-                <a className="text-inherit" href="/libary">Libary</a>
+            <div className="text-stone-600">
+                <a className="text-inherit hover:text-inherit" href="/library">Library</a>
             </div>
         </div>
     );

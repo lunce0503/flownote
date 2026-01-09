@@ -1,35 +1,73 @@
-import { useState , useRef, useEffect } from "react";
+import React, { useState , useRef, useEffect } from "react";
 import HandleIcon from '../../../shared/assets/BlockHandleIcon.png';
 import './BlogBlock.css';
 
-interface Propers {
+interface BlockPropers {
+    id : number;
+    type: string|undefined;
     size: number;
     posion: {x: number, y: number};
+    data: string; // text content, image url, video url, latex code etc.
 }
 
-const TextBlock = () => {
-    const [isEdited, setIsEdited]= useState<boolean>(true);
+interface BasePropers{
+    content?: string
+}
+
+const Container= ({children} : {children: React.ReactNode}) => {
+    return(
+        <div className="container-component m-1 p-0">
+            {children}
+        </div>
+    )
+}
+
+const TextBlock = (contentProp:BasePropers) => {
+    const [isEditable, setIsEditable]= useState<boolean>(true);
+    const [content, setContent] = useState<string|undefined>(contentProp.content);
     const textBlockRef = useRef<HTMLDivElement>(null);
     
     const onDoubleClick = (e: React.MouseEvent) => {
         if (e.button === 0){
-            setIsEdited(!isEdited);
-            console.log("Block clicked",isEdited);
+            setIsEditable(!isEditable);
+            console.log("isEditable",isEditable);
         }
-        return isEdited
+        return isEditable
     };
 
+    const onInput = () => {
+        useEffect(() => {
+            console.log("isChaged",content)
+            if (textBlockRef.current) {
+                const newText = textBlockRef.current.innerText;
+                setContent(newText);
+            }
+        }, [content]);
+    };
+   
     return (
         <div
+            onInput={onInput}
             onDoubleClick={onDoubleClick}
-            className="text-block p-2 rounded-md" 
-            contentEditable={isEdited} ref={textBlockRef} 
-        >
+            className="text-block p-2 min-w-1/5 bg-white rounded-md text-black" 
+            contentEditable={!isEditable} ref={textBlockRef} 
+            suppressContentEditableWarning={true}
+        >{content}
         </div>
     );
 };
 
-const ImageBlock =() => {
+const ImageBlock =(content:BasePropers) => {
+    return (
+        <div
+            className="image-block "    
+        >
+
+        </div>
+    );
+}
+
+const VideoBlock =(BasePropers:BasePropers)=>{
     return (
         <div>
 
@@ -37,29 +75,53 @@ const ImageBlock =() => {
     );
 }
 
-const Block = () => {
-    const currentBlocks : HTMLDivElement[] = [];
-    currentBlocks.push(<TextBlock/> as unknown as HTMLDivElement);
-    currentBlocks.push(<TextBlock/> as unknown as HTMLDivElement);
-    currentBlocks.push(<TextBlock/> as unknown as HTMLDivElement);
-    currentBlocks.push(<TextBlock/> as unknown as HTMLDivElement);
-    currentBlocks.push(<TextBlock/> as unknown as HTMLDivElement);
-    currentBlocks.push(<TextBlock/> as unknown as HTMLDivElement);
-
-    useEffect(() => {
-        return () => {
-            currentBlocks.push(<TextBlock/> as unknown as HTMLDivElement);
-        }
-    },[currentBlocks])
-
+const MathExpressionBlock = (BasePropers:BasePropers) => {
     return (
-        <div className="block-component flex justify-between m-4 rounded-lg text-black bg-white"
-        >
-            {currentBlocks.map((block: HTMLDivElement) => (
-                <TextBlock key={block.id} />
-            ))}
+        <div>
+
         </div>
     );
+}
+
+const Block: React.FC<{Props: BlockPropers; onRemove: (id: number) => void}> = ({
+    Props,
+    onRemove,
+    }) => {
+    if(Props.type === 'text'){
+        return (
+            <Container>
+                <TextBlock 
+                    content={Props.data}
+                />
+            </Container>
+        );}
+
+    if(Props.type === 'image'){
+        return (
+            <Container>
+                <ImageBlock 
+                
+                />
+            </Container>
+        );}
+
+    if(Props.type ==='math'){
+        return (
+            <Container>
+                <MathExpressionBlock
+                
+                />
+            </Container>
+        );}
+
+    if(Props.type === 'video'){
+        return (
+            <Container>
+                <VideoBlock
+                    
+                />
+            </Container>
+        );}
 }
 
 export default Block;
