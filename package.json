@@ -10,9 +10,15 @@
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/react": "^0.3.2",
     "@dnd-kit/sortable": "^10.0.0",
+    "@react-pdf-viewer/core": "^3.12.0",
+    "@react-pdf-viewer/default-layout": "^3.12.0",
+    "@types/react-modal": "^3.16.3",
+    "katex": "^0.16.27",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "react-katex": "^3.1.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",
