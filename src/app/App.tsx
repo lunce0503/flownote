@@ -10,6 +10,7 @@ import Magic from './routers/magic/magic.tsx';
 import Home from './routers/Home';
 import Blog from './routers/Blog/index.tsx';
 import Library from './routers/Library/index.tsx';
+import Social from './routers/Social/index.tsx';
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
             <Route path="/magic" element={<Magic />} />
             <Route path="/blog" element={<Blog />}></Route>
             <Route path="/library" element={<Library />}></Route>
+            <Route path="/social" element={<Social />}></Route>
           </Routes>
         </BrowserRouter>
       </div>

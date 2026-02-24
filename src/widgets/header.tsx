@@ -23,6 +23,9 @@ export default function Header() {
             <div className="text-stone-600">
                 <a className="text-inherit hover:text-inherit" href="/library">Library</a>
             </div>
+            <div className="text-stone-600">
+                <a className="text-inherit hover:text-inherit" href="/social">Social</a>
+            </div>
         </div>
     );
 } 
