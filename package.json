@@ -16,11 +16,15 @@
     "@react-pdf-viewer/core": "^3.12.0",
     "@react-pdf-viewer/default-layout": "^3.12.0",
     "@types/react-modal": "^3.16.3",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "axios": "^1.13.5",
     "katex": "^0.16.27",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-katex": "^3.1.0"
+    "react-katex": "^3.1.0",
+    "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^16.1.1",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",
