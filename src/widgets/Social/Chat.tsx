@@ -4,6 +4,10 @@ import axios from 'axios';
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from "rehype-raw";
+import rehypeKatex from "rehype-katex";
+import remarkMath from "remark-math";
+import 'katex/dist/katex.min.css';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
@@ -26,12 +30,11 @@ const ChatBlock = ({ sender, message }: ChatMessage) => {
                 ? 'bg-blue-600 text-white rounded-tr-none' 
                 : 'bg-white text-gray-800 border border-gray-200 rounded-tl-none'
             }`}>
-                {/* 1. className을 여기서 제거하고 감싸는 div로 처리하거나, 스타일을 내부 컴포넌트로 분산합니다. */}
                 <div className="text-sm leading-relaxed markdown-body">
                     <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
+                        remarkPlugins={[remarkGfm,remarkMath]}
+                        rehypePlugins={[rehypeRaw,rehypeKatex]}
                         components={{
-                            // v9에서는 'inline' 대신 'className'의 존재 여부로 인라인 코드를 판단하는 경우가 많습니다.
                             code(props: any) {
                                 const { children, className, node, ...rest } = props;
                                 const match = /language-(\w+)/.exec(className || '');
@@ -55,6 +58,7 @@ const ChatBlock = ({ sender, message }: ChatMessage) => {
                             ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
                             ol: ({ children }) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
                             p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+                            u: ({ children }) => <span className="underline">{children}</span>,
                         }}
                     >
                         {message}
@@ -112,10 +116,15 @@ const Chat = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isAsking, setIsAsking] = useState(false);
 
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+    
     const scrollToBottom = () => {
-            if (scrollRef.current) {
-            scrollRef.current?.scrollIntoView({behavior:"smooth"});
+            if (chatContainerRef.current) {
+                const container = chatContainerRef.current;
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: "auto"
+                });
         }
     }
 
@@ -231,8 +240,6 @@ const Chat = () => {
         // console.log(!isAsking);
     }
 
-    
-
     // when first enter
     useEffect(() => {
         getMessages();
@@ -248,12 +255,13 @@ const Chat = () => {
 
     return (
         <div className="flex flex-col h-[600px] max-w-lg mx-auto border rounded-2xl overflow-hidden shadow-xl bg-gray-100">
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col">
+            <div ref={chatContainerRef}
+                className="flex-1 overflow-y-auto p-4 flex flex-col"
+            >
                 {messages.length === 0 }
                 {messages.map((msg) => (
                     <ChatBlock key={msg.id} {...msg} />
                 ))}
-                <div ref={scrollRef} />
             </div>
             <ChatSendBlock onSend={handleSend} onMode={handleChatMode}/>
         </div>
