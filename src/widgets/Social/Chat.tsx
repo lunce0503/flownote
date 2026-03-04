@@ -2,14 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import axios from 'axios';
 
 
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from "rehype-raw";
-import rehypeKatex from "rehype-katex";
-import remarkMath from "remark-math";
-import 'katex/dist/katex.min.css';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import ReactMarkdownRender from "../../shared/ui/ReactMarkdownRender";
 
 // 1. 타입 정의 
 interface ChatMessage {
@@ -24,45 +17,14 @@ const ChatBlock = ({ sender, message }: ChatMessage) => {
     const isUser = sender === "user";
 
     return (
-        <div className={`flex w-full mb-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] p-3 rounded-2xl shadow-sm ${
+        <div className={`chat-block flex w-full mb-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
+            <div className={`chat-block-design max-w-[85%] p-3 rounded-2xl shadow-sm ${
                 isUser 
                 ? 'bg-blue-600 text-white rounded-tr-none' 
                 : 'bg-white text-gray-800 border border-gray-200 rounded-tl-none'
             }`}>
-                <div className="text-sm leading-relaxed markdown-body">
-                    <ReactMarkdown
-                        remarkPlugins={[remarkGfm,remarkMath]}
-                        rehypePlugins={[rehypeRaw,rehypeKatex]}
-                        components={{
-                            code(props: any) {
-                                const { children, className, node, ...rest } = props;
-                                const match = /language-(\w+)/.exec(className || '');
-                                return match ? (
-                                    <div className="my-2 rounded-md overflow-hidden">
-                                        <SyntaxHighlighter
-                                            {...rest}
-                                            style={oneDark}
-                                            language={match[1]}
-                                            PreTag="div"
-                                        >
-                                            {String(children).replace(/\n$/, '')}
-                                        </SyntaxHighlighter>
-                                    </div>
-                                ) : (
-                                    <code className="bg-gray-200 text-red-500 px-1 rounded" {...rest}>
-                                        {children}
-                                    </code>
-                                );
-                            },
-                            ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
-                            ol: ({ children }) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
-                            p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
-                            u: ({ children }) => <span className="underline">{children}</span>,
-                        }}
-                    >
-                        {message}
-                    </ReactMarkdown>
+                <div className="markdown-render text-sm leading-relaxed markdown-body">
+                    <ReactMarkdownRender message={message}/>
                 </div>
             </div>
         </div>
