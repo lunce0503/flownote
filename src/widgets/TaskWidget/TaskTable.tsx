@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import getTaskData from "../../entities/task/api/getTaskData";
 import postTaskData from "../../entities/task/api/postTaskData";
 import deleteTasksData from "../../entities/task/api/deleteTaskData";
 import updateTasksData from "../../entities/task/api/updateTaskData";
 
-import { TaskHeader,TaskInput, TaskList } from "./TaskEliment";
+import { TaskHeader, TaskItem } from "./TaskEliment";
 import type { TaskProps } from "./TaskEliment";
+import { AlertCircle } from "lucide-react";
 
 const TaskTable = () => {
     const [tasks, setTasks] = useState<TaskProps[]>([]);
@@ -16,10 +18,27 @@ const TaskTable = () => {
             setTasks(tasksData);
         };
 
-    const AddTask = (task : TaskProps) => {
-        postTaskData(task);
-        setTasks((prevTask)=>[...prevTask, task]);
-    }
+    const AddTask = () => {
+        // postTaskData(task);
+        // setTasks((prevTask)=>[...prevTask, task]);
+        const newTask: TaskProps = {
+            id: uuidv4(),
+            create_at: new Date(),
+            update_at: new Date(),
+            task_name: "",
+            category: "",
+            difficulty_level: 1,
+            status: 'TODO',
+            description: null,
+            estimated_minutes: 0,
+            actual_minutes: 0,
+            due_date: new Date().toISOString().split('T')[0],
+            memo: "",
+            tags: []
+        };
+        postTaskData(newTask);
+        setTasks([...tasks, newTask]);
+    };
     
     const UpadateTask = (updatedTask:TaskProps) => {
         try{
@@ -38,9 +57,9 @@ const TaskTable = () => {
         }
     };
 
-    const handleDeleteTask = (deleteTask:TaskProps)=>{
-        deleteTasksData(deleteTask.id);
-        setTasks((prevTasks) => prevTasks.filter((task)=>task.id !== deleteTask.id))
+    const handleDeleteTask = (id:string)=>{
+        deleteTasksData(id);
+        setTasks((prevTasks) => prevTasks.filter((task)=>task.id !== id))
     }
 
     useEffect(() => {
@@ -52,8 +71,25 @@ const TaskTable = () => {
         <div>
             <div className="tasks-table bg-amber-50 text-black m-3 p-3 rounded-2xl">Task Table</div>
             <TaskHeader />
-            <TaskList tasks={tasks} onDeleteClick={handleDeleteTask} onChange={UpadateTask} />
-            <TaskInput onClick={AddTask}/>
+            <div>
+                {tasks.length === 0 ? (
+                    <div>
+                        <AlertCircle size={48} />
+                        <p className="text-gray-500">No tasks available. Please add a task.</p>
+                    </div>
+                ) 
+                : (tasks.map(task => (
+                    <TaskItem 
+                        key={task.id} 
+                        task={task}
+                        onDelete={handleDeleteTask}
+                        onChange={UpadateTask}
+                    />
+                    ))
+                )}
+            </div>
+            <button onClick={AddTask}>+ Add Task</button>
+            {/* <TaskInput onClick={AddTask}/> */}
         </div>
     );
 };
