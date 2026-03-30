@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:8000";
+import { API_BASE_URL,DEFAULT_HEADERS } from "../../../shared/api";
 
 export const chatService = {
 
@@ -10,7 +10,7 @@ export const chatService = {
   async createChat(chat: string) {
     const response = await fetch(`${API_BASE_URL}/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: DEFAULT_HEADERS,
       body: JSON.stringify({ chat }),
     });
     return response.json();
