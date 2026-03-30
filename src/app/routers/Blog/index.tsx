@@ -1,10 +1,9 @@
-import React from "react";
-import BlogNote from "../../../widgets/Blog/BlogNote";
+import BlogPage from "../../../pages/BlogPage";
 
 const Blog = () => {
     return (
         <div>
-            <BlogNote />
+            <BlogPage />
         </div>
     );
 }

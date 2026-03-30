@@ -4,8 +4,7 @@ import React from "react";
 const Home = () => {
     return (
         <div>
-            {/* <MainContent /> */}
-            {/* <Sidebar /> */}
+            홈 페이지입니다.
         </div>
     );
 };
