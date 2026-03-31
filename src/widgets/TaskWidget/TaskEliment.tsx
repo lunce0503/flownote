@@ -1,6 +1,4 @@
-import { useState, useRef } from "react";
-import { v4 as uuidv4 } from "uuid";
-import { Trash2, Tag} from "lucide-react";
+import { Trash2, Tag } from "lucide-react";
 
 // --- Types ---
 export interface TaskProps {
@@ -19,7 +17,6 @@ export interface TaskProps {
     due_date: string;
     memo: string | null;
     tags: string[];
-    
 }
 
 // --- Constants & Styles ---
@@ -41,9 +38,15 @@ const GRID_LAYOUT = {
     gap: '',
 }
 
+const GRID_HEADER_LAYOUT = {
+    display: 'hidden md:grid grid-cols-12 gap-2 items-center px-4 py-3',
+    columns: 'grid-cols-12',
+    gap: '',
+}
+
 // --- Components ---
 const TaskHeader = () => (
-  <div className={`hidden md:${GRID_LAYOUT.display} bg-gray-800 text-white text-xs font-bold uppercase rounded-t-xl mx-4`}>
+  <div className={` ${GRID_HEADER_LAYOUT.display} bg-gray-600 text-white text-xs font-bold uppercase rounded-t-xl mx-4`}>
     <div className="col-span-3">일정명</div>
     <div className="col-span-1 text-center">상태</div>
     <div className="col-span-1 text-center">카테고리</div>
@@ -82,14 +85,14 @@ const TaskItem = ({
         }
 
         return (
-            <div className={`${GRID_LAYOUT.display} ${GRID_LAYOUT.columns} mx-10 text-black border-b bg-white`}>
+            <div className={`${GRID_LAYOUT.display} ${GRID_LAYOUT.columns} mx-4 text-black border-b bg-gray-300 last:border-0 group hover:bg-gray-200 rounded-lg transition-all group`}>
                 {/* Task Name & Delete */}
                 <div className="col-span-12 md:col-span-3 flex items-center gap-2">
                     <button 
                         className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all"
                         onClick={() => onDelete(task.id)}
                     >
-                        <Trash2 size={16} className="text-black"/>
+                        <Trash2 size={14} />
                     </button>
                     <input type="text"
                         value={task.task_name}
@@ -175,7 +178,5 @@ const TaskItem = ({
             </div>
         );
     };
-
-
 
 export { TaskHeader,  TaskItem};

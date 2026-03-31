@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import getTaskData from "../../entities/task/api/getTaskData";
@@ -8,7 +8,7 @@ import updateTasksData from "../../entities/task/api/updateTaskData";
 
 import { TaskHeader, TaskItem } from "./TaskEliment";
 import type { TaskProps } from "./TaskEliment";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Plus } from "lucide-react";
 
 const TaskTable = () => {
     const [tasks, setTasks] = useState<TaskProps[]>([]);
@@ -70,26 +70,36 @@ const TaskTable = () => {
     return (
         <div>
             <div className="tasks-table bg-amber-50 text-black m-3 p-3 rounded-2xl">Task Table</div>
-            <TaskHeader />
-            <div>
-                {tasks.length === 0 ? (
-                    <div>
-                        <AlertCircle size={48} />
-                        <p className="text-gray-500">No tasks available. Please add a task.</p>
-                    </div>
-                ) 
-                : (tasks.map(task => (
-                    <TaskItem 
-                        key={task.id} 
-                        task={task}
-                        onDelete={handleDeleteTask}
-                        onChange={UpadateTask}
-                    />
-                    ))
-                )}
+            <div className="mx-4 p-4 bg-white rounded-2xl shadow-md">
+                <TaskHeader />
+                <div>
+                    {tasks.length === 0 ? (
+                        <div className="flex flex-direction-column items-center mx-4 p-4 bg-white">
+                            <AlertCircle size={48} />
+                            <p className="text-gray-700">No tasks available. Please add a task.</p>
+                        </div>
+                    ) 
+                    : (tasks.map(task => (
+                        <TaskItem 
+                            key={task.id} 
+                            task={task}
+                            onDelete={handleDeleteTask}
+                            onChange={UpadateTask}
+                        />
+                        ))
+                    )}
+                </div>
+                <div className="grid grid-cols-12">
+                    <button 
+                        onClick={AddTask}
+                        className="flex items-center justify-center col-span-12 mx-4 bg-gray-600 text-white rounded-b-xl hover:bg-gray-700 transition-colors"
+                    >
+                        <Plus size={24} />
+                    </button>  
+                </div>
+                  
             </div>
-            <button onClick={AddTask}>+ Add Task</button>
-            {/* <TaskInput onClick={AddTask}/> */}
+            
         </div>
     );
 };
