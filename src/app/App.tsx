@@ -8,6 +8,8 @@ import Home from './routers/Home';
 import Blog from './routers/Blog/index.tsx';
 import Social from './routers/Social/index.tsx';
 import TaskRoute from './routers/Task/route.tsx';
+import LoginRoute from './routers/Login/route.tsx';
+import SignUpRoute from './routers/SignUp/routes.tsx';
 
 const App = () => {
   return (
@@ -21,6 +23,8 @@ const App = () => {
             <Route path="/blog" element={<Blog />}></Route>
             <Route path="/social" element={<Social />}></Route>
             <Route path="/task" element={<TaskRoute />}></Route>
+            <Route path="/login" element={<LoginRoute />}></Route>
+            <Route path="/signup" element={<SignUpRoute />}></Route>
           </Routes>
         </BrowserRouter>
       </div>

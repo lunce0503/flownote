@@ -143,7 +143,7 @@ const Chat = () => {
     }, [messages]);
 
     return (
-        <div className="flex flex-col h-150 max-w-lg mx-auto m-4 border rounded-2xl overflow-hidden shadow-xl bg-gray-100">
+        <div className="flex flex-col h-150 m-4 border rounded-2xl overflow-hidden shadow-xl bg-gray-100">
             <div 
                 className="flex-1 m-1 overflow-y-auto p-4 flex flex-col"
                 ref={chatContainerRef}
