@@ -1,10 +1,11 @@
-import BlockNote from "../../widgets/BlogWidget/BlockNote";
 import BlogList from "../../widgets/BlogWidget/BlogList";
+
 const BlogPage = () => {
     return (
-        <div>
-            <BlogList />
-            <BlockNote />
+        <div className="flex flex-row">
+            <div className="flex-2">
+                <BlogList />
+            </div>
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect,useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import getTaskData from "../../entities/task/api/getTaskData";
@@ -8,11 +8,58 @@ import updateTasksData from "../../entities/task/api/updateTaskData";
 
 import { TaskHeader, TaskItem } from "./TaskEliment";
 import type { TaskProps } from "./TaskEliment";
-import { AlertCircle, Plus } from "lucide-react";
+import { SortAsc, AlertCircle, Plus, Filter } from "lucide-react";
 
 const TaskTable = () => {
     const [tasks, setTasks] = useState<TaskProps[]>([]);
+    // 상태 관리 
+    const [filterStatus, setFilterStatus] = useState<string>("ALL");
+    const [sortCriterion, setSortCriterion] = useState<string>("due_date");
+    const [isLoading,setIsLoading] = useState(true);
 
+    useEffect(() => {
+        fetchTasks();
+        setIsLoading(false);
+    },[]);
+
+    const processedTasks = useMemo(() => {
+        let result = [...tasks];
+
+        // 필터링
+        if (filterStatus !== "ALL") {
+        result = result.filter((t) => t.status === filterStatus);
+        }
+
+        // 정렬
+        result.sort((a, b) => {
+        // 완료된 항목은 무조건 최하단 배치
+        if (a.status === 'DONE' && b.status !== 'DONE') return 1;
+        if (a.status !== 'DONE' && b.status === 'DONE') return -1;
+
+        if (sortCriterion === "due_date") {
+            return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+        } else if (sortCriterion === "difficulty") {
+            return b.difficulty_level - a.difficulty_level;
+        } else if (sortCriterion === "estimated") {
+            return a.estimated_minutes - b.estimated_minutes;
+        } else if (sortCriterion === "task_name") {
+            return a.task_name.localeCompare(b.task_name ,'ko', {sensitivity:'base'})
+        }
+        return 0;
+        });
+
+        return result;
+    }, [tasks, filterStatus, sortCriterion]);
+
+    // 통계 계산
+    const stats = useMemo(() => {
+        const totalMinutes = tasks
+        .filter(t => t.status !== 'DONE')
+        .reduce((acc, curr) => acc + curr.estimated_minutes, 0);
+        const completedCount = tasks.filter(t => t.status === 'DONE').length;
+        return { totalMinutes, completedCount };
+    }, [tasks]);
+    // CRUD 핸들러
     const fetchTasks = async () => {
             const tasksData = await getTaskData();
             setTasks(tasksData);
@@ -62,25 +109,57 @@ const TaskTable = () => {
         setTasks((prevTasks) => prevTasks.filter((task)=>task.id !== id))
     }
 
-    useEffect(() => {
-        fetchTasks();
-    },[]);
+    
 
 
     return (
         <div>
             <div className="mx-4 p-4 bg-white rounded-2xl shadow-md">
                 <div className="tasks-table bg-amber-50 text-black m-3 p-3 rounded-2xl">Task Table</div>
-
-                <TaskHeader />
+                {/* TaskHeader */}
                 <div>
-                    {tasks.length === 0 ? (
+                    
+                    {/* TaskFilter */}
+                    <div className="flex flex-row items-center gap-2 text-black mx-4">
+                        <div className="flex  items-center gap-2">
+                            <Filter size={16} className="text-gray-400" />
+                            <select 
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            className="text-sm border-none bg-gray-50 rounded-lg focus:ring-2 focus:ring-blue-100 py-1.5"
+                            >
+                            <option value="ALL">모든 상태</option>
+                            <option value="TODO">할 일</option>
+                            <option value="DOING">진행 중</option>
+                            <option value="DONE">완료됨</option>
+                            </select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <SortAsc size={16} className="text-gray-400" />
+                            <select 
+                            value={sortCriterion}
+                            onChange={(e) => setSortCriterion(e.target.value)}
+                            className="text-sm border-none bg-gray-50 rounded-lg focus:ring-2 focus:ring-blue-100 py-1.5"
+                            >
+                            <option value="due_date">마감일 빠른 순</option>
+                            <option value="task_name">일정명 순</option>
+                            <option value="difficulty">난이도 높은 순</option>
+                            <option value="estimated">예상 시간 짧은 순</option>
+                            </select>
+                        </div>
+                    </div>
+                    <TaskHeader />
+                </div>
+                {/* TaskTable */}
+                <div>
+                    {isLoading ? (
+                        <div className="flex justify-center items-center py-20 italic text-gray-400">데이터를 불러오는 중...</div>
+                    ) : processedTasks.length === 0 ? (
                         <div className="flex flex-direction-column items-center mx-4 p-4 bg-white">
                             <AlertCircle size={48} />
                             <p className="text-gray-700">No tasks available. Please add a task.</p>
                         </div>
-                    ) 
-                    : (tasks.map(task => (
+                    ) : (processedTasks.map(task => (
                         <TaskItem 
                             key={task.id} 
                             task={task}
@@ -90,6 +169,7 @@ const TaskTable = () => {
                         ))
                     )}
                 </div>
+                {/* Add button */}
                 <div className="grid grid-cols-12">
                     <button 
                         onClick={AddTask}
