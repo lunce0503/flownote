@@ -1,13 +1,16 @@
-import React from "react";
+import TaskTable from "../../widgets/TaskWidget/TaskTable";
+import Chat from "../../widgets/SocialWidget/Chat";
 
-import Sidebar from "../../widgets/sidebar";
-import MainContent from "../../widgets/mainContent";
 
 const Home = () => {
     return (
-        <div>
-            {/* <MainContent /> */}
-            {/* <Sidebar /> */}
+        <div className="grid grid-cols-20 grid-rows-5">
+            <div className="col-span-10 row-start-1">
+                <Chat/>
+            </div>
+            <div className="col-span-10 p-4 row-start-1">
+                <TaskTable />
+            </div>
         </div>
     );
 };
