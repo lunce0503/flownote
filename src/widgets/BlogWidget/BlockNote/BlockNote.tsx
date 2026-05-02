@@ -3,11 +3,13 @@ import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Block } from "@blocknote/core";
+import { BlockNoteSchema, type Block, defaultBlockSpecs } from "@blocknote/core";
 import postNoteData from "../../../entities/blog/postNoteData";
 import { v4 as uuidv4 } from "uuid";
 import { useParams } from "react-router-dom";
 import getNoteData from "../../../entities/blog/getNoteData";
+import { API_BASE_URL2 } from "../../../shared/api";
+import axios from "axios";
 
 interface BlockDataProps {
   id: string;
@@ -15,10 +17,31 @@ interface BlockDataProps {
   content: Block[];
   created_at: Date;
 }
+const uploadFile = async (file: File) => {
+  const body = new FormData();
+  body.append("file", file);
 
+  const response = await axios.post(`${API_BASE_URL2}/api/notes/upload`, body);
+
+  const data = response.data;
+  const finalUrl = `${API_BASE_URL2}${data.fileUrl}`;
+  
+  console.log("최종 전달된 이미지 URL:", finalUrl); // 디버깅용
+  return finalUrl;
+}
 const  BlockNote = () => {
   const { title } = useParams<{title:string}>();
-  const editor = useCreateBlockNote();
+
+  // const schema = BlockNoteSchema.create({
+  //   blockSpecs: {
+  //     ...defaultBlockSpecs,
+  //     math: Math,
+  //   }
+  // })
+
+  const editor = useCreateBlockNote({
+    uploadFile,    
+  });
   const [noteData,setNoteData] = useState<BlockDataProps | null>(null);
   const [isLoading,setIsLoading] = useState<boolean>(true);
   
@@ -78,7 +101,7 @@ const  BlockNote = () => {
   if (!noteData) return <div className="p-10 text-center text-stone-500">노트를 찾을 수 없습니다.</div>;
   
   return (
-    <div className="my-5 mx-1 bg-white rounded-xl p-4">
+    <div className="m-4 bg-white rounded-xl p-4">
       <div className='note-header mb-2 bg-amber-100 text-stone-800 rounded-xl p-1'>
         <input 
           type="text" 

@@ -114,8 +114,8 @@ const TaskTable = () => {
 
     return (
         <div>
-            <div className="mx-4 p-4 bg-white rounded-2xl shadow-md">
-                <div className="tasks-table bg-amber-50 text-black m-3 p-3 rounded-2xl">Task Table</div>
+            <div className="m-4 p-4 bg-white rounded-2xl shadow-md">
+                <div className="tasks-table bg-amber-100 text-black m-3 p-3 rounded-2xl">Task Table</div>
                 {/* TaskHeader */}
                 <div>
                     

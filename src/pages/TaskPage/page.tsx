@@ -4,9 +4,9 @@ const TaskPage = () => {
     
 
     return (
-        <div>
+        <main className="flex-1 w-full bg-[#242424]">
             <TaskTable />
-        </div>
+        </main>
     );
 }
 

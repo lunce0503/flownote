@@ -230,7 +230,7 @@ const Canvas = () => {
 
 
     return (
-        <div>
+        <div className="bg-amber-100">
             {/* Toolbar */}
             <Toolbar
                 tool={tool}

@@ -65,7 +65,7 @@ const Bloglist = () => {
         postNoteData(blankNote);
     }
     return (
-        <div className="bg-white rounded-xl p-4">
+        <div className="m-4 bg-white rounded-xl p-4">
             {/* Blog List Title*/}
             <div className="bg-amber-100 mt-5 hover:bg-amber-200 text-stone-800 font-bold py-4 px-4 rounded">
                 {loading ? "Loading" : "Load Blog List"}

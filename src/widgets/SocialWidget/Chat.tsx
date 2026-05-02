@@ -3,6 +3,7 @@ import axios from 'axios';
 import { ChatBlock, ChatSendBlock, type ChatMessage } from "../../shared/ui/ChatBlock";
 import { v4 as uuidv4 } from 'uuid';
 import { API_BASE_URL } from "../../shared/api";
+import postChatData from "../../entities/chat/api/postChatData";
 
 const Chat = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -33,7 +34,7 @@ const Chat = () => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 // 현재 백엔드에서 받는 body가 없으므로 생략하거나 빈 객체 전달
-                body: JSON.stringify({}), 
+                body: JSON.stringify({user_text: messages[messages.length - 1].message}), 
             });
             if (!response.body) throw new Error("응답 바디가 없습니다.");
 
@@ -90,16 +91,12 @@ const Chat = () => {
             setIsLoading(true);
 
             try {
-                // axios.post(url, payload, config) 구조입니다.
-                const response = await axios.post(`${API_BASE_URL}/api/chat`, {
+                const data: ChatMessage = await postChatData({
                     message: text,
                     sender: "user",
                     timestamp: new Date(),
                     id:uuidv4()
-                });
-
-                // axios는 응답 바디가 자동으로 response.data에 담깁니다.
-                const data = response.data; 
+                }); 
                 
                 console.log(data.message);
                 console.log(data);

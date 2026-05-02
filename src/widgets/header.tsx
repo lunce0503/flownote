@@ -30,7 +30,7 @@ export default function Header() {
   return (
     <>
       {/* --- 기존 헤더 유지 --- */}
-      <header className="w-full h-1/5 bg-amber-100 py-2 px-2 relative z-30">
+      <header className="w-full bg-amber-100 py-2 px-2 relative z-30">
         <nav className="flex flex-row items-center justify-between text-stone-600">
           {/* Left Section: Menu & Logo */}
           <div className="flex items-center gap-2 md:gap-2">
@@ -104,6 +104,7 @@ export default function Header() {
         className={`fixed top-0 left-0 h-full w-64 bg-stone-50 z-50 shadow-2xl transform transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        style={{ pointerEvents: isSidebarOpen ? 'auto' : 'none'} }
       >
         <div className="p-5 flex flex-col h-full">
           {/* Sidebar Header */}
