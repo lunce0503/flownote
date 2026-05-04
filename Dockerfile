@@ -14,4 +14,4 @@ COPY --from=build /app/dist /app/dist
 
 # 5173 포트로 실행, -s 옵션이 SPA 라우팅(404 방지)을 해결함
 EXPOSE 5173
-CMD ["serve", "-s", "dist", "-l", "5173"]
+CMD ["serve", "-s", "dist", "-l", "tcp://0.0.0.0:5173"]
