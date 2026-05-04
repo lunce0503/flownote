@@ -5,25 +5,37 @@ import {
   Lock, 
   ArrowRight
 } from "lucide-react";
-import getUserData from "../../entities/users/api/getUserData";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import loginUserData from "../../entities/users/api/loginUserData";
+import { useAuth } from "../../shared/auth/AuthContext";
 
 export default function LoginPage() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("로그인 시도:", { email, password });
-    getUserData().then(users => {
-      const user = users.find((u: any) => u.email === email); 
-      if (user) {
-        console.log("사용자 정보:", user);
-        alert(`환영합니다, ${user.nickname}님!`);
-      } else {
-        alert("이메일을 찾을 수 없습니다. 다시 시도해주세요.");
-      }
-    });
+    setErrorMessage("");
+    setIsSubmitting(true);
 
+    try {
+      const loginResponse = await loginUserData({ email, password });
+      login(loginResponse.token, loginResponse.user);
+      navigate("/", { replace: true });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setErrorMessage(error.response?.data?.error ?? "로그인에 실패했습니다.");
+      } else {
+        setErrorMessage("로그인에 실패했습니다.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Chrome 아이콘을 위한 인라인 SVG
@@ -93,7 +105,7 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   placeholder="name@example.com"
-                  className="w-full pl-10 pr-4 py-3 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-white text-black border border-stone-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -117,7 +129,7 @@ export default function LoginPage() {
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-3 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-white text-black border border-stone-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -128,11 +140,18 @@ export default function LoginPage() {
             {/* 로그인 버튼 */}
             <button
               type="submit"
+              disabled={isSubmitting}
               className="w-full bg-stone-800 text-amber-50 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-stone-700 transition-all shadow-md group mt-6"
             >
-              계속하기
+              {isSubmitting ? "확인 중..." : "계속하기"}
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </button>
+
+            {errorMessage && (
+              <p className="text-sm text-red-600 text-center" role="alert">
+                {errorMessage}
+              </p>
+            )}
           </form>
 
           {/* 구분선 */}

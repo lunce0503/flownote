@@ -3,15 +3,22 @@ import {
   Notebook, 
   Menu, 
   LogIn, 
+  LogOut,
   CheckSquare, 
   BookOpen, 
   Users, 
-  X 
+  X,
+  User
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../shared/auth/AuthContext";
 
 export default function Header() {
   // 사이드바 상태 관리
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
   const onMenuClick = () => {
     setIsSidebarOpen(true);
@@ -21,10 +28,27 @@ export default function Header() {
     setIsSidebarOpen(false);
   };
 
+  const closeProfile = () => {
+    setIsProfileOpen(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    closeProfile();
+    closeSidebar();
+    navigate("/");
+  };
+
   const navLinks = [
     { name: "Blog", href: "/blog", icon: <BookOpen size={22} /> },
     { name: "Social", href: "/social", icon: <Users size={22} /> },
     { name: "Task", href: "/task", icon: <CheckSquare size={22} /> },
+  ];
+
+  const profileLinks = [
+    { name: "Canvas", href: "/canvas", icon: <Notebook size={18} /> },
+    { name: "Social", href: "/social", icon: <Users size={18} /> },
+    { name: "Task", href: "/task", icon: <CheckSquare size={18} /> },
   ];
 
   return (
@@ -73,18 +97,66 @@ export default function Header() {
           {/* Center Section: Placeholder */}
           <div className="flex flex-row items-center gap-4 md:gap-8 font-medium"></div>
 
-          {/* Right Section: Login Action */}
-          <div className="flex items-center">
-            <a
-              className="flex items-center justify-center p-2 md:px-4 md:py-2 bg-stone-700 text-amber-50 rounded-full hover:bg-stone-600 transition-all shadow-md"
-              href="/login"
-              title="Login"
-            >
-              <LogIn size={20} />
-              <span className="hidden md:inline ml-2 text-sm font-semibold">
-                Login
-              </span>
-            </a>
+          {/* Right Section: Login/Profile Action */}
+          <div className="relative flex items-center">
+            {isAuthenticated && user ? (
+              <>
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-2 p-2 md:px-4 md:py-2 bg-stone-700 text-amber-50 rounded-full hover:bg-stone-600 transition-all shadow-md"
+                  title={user.nickname}
+                  aria-haspopup="menu"
+                  aria-expanded={isProfileOpen}
+                  onClick={() => setIsProfileOpen((open) => !open)}
+                >
+                  <User size={20} />
+                  <span className="hidden md:inline max-w-32 truncate text-sm font-semibold">
+                    {user.nickname}
+                  </span>
+                </button>
+
+                {isProfileOpen && (
+                  <div
+                    className="absolute right-0 top-12 w-48 rounded-lg border border-stone-200 bg-stone-50 py-2 shadow-xl"
+                    role="menu"
+                  >
+                    {profileLinks.map((link) => (
+                      <a
+                        key={link.name}
+                        href={link.href}
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-stone-700 hover:bg-amber-100 transition-colors"
+                        role="menuitem"
+                        onClick={closeProfile}
+                      >
+                        {link.icon}
+                        <span>{link.name}</span>
+                      </a>
+                    ))}
+                    <div className="my-2 border-t border-stone-200" />
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-stone-700 hover:bg-amber-100 transition-colors"
+                      role="menuitem"
+                      onClick={handleLogout}
+                    >
+                      <LogOut size={18} />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <a
+                className="flex items-center justify-center p-2 md:px-4 md:py-2 bg-stone-700 text-amber-50 rounded-full hover:bg-stone-600 transition-all shadow-md"
+                href="/login"
+                title="Login"
+              >
+                <LogIn size={20} />
+                <span className="hidden md:inline ml-2 text-sm font-semibold">
+                  Login
+                </span>
+              </a>
+            )}
           </div>
         </nav>
       </header>
@@ -140,14 +212,43 @@ export default function Header() {
             
             <div className="my-4 border-t border-stone-200" />
             
-            <a 
-              href="/login"
-              className="flex items-center gap-4 p-3 rounded-lg hover:bg-stone-800 hover:text-amber-50 text-stone-700 transition-all group"
-              onClick={closeSidebar}
-            >
-              <LogIn size={22} className="text-stone-500 group-hover:text-amber-50" />
-              <span className="text-lg font-medium">Login</span>
-            </a>
+            {isAuthenticated && user ? (
+              <>
+                <div className="px-3 py-2 text-sm text-stone-500">
+                  {user.nickname}
+                </div>
+                {profileLinks.map((link) => (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-amber-100 text-stone-700 transition-colors group"
+                    onClick={closeSidebar}
+                  >
+                    <span className="text-stone-500 group-hover:text-stone-700 transition-colors">
+                      {link.icon}
+                    </span>
+                    <span className="text-lg font-medium">{link.name}</span>
+                  </a>
+                ))}
+                <button
+                  type="button"
+                  className="flex items-center gap-4 p-3 rounded-lg hover:bg-stone-800 hover:text-amber-50 text-stone-700 transition-all group"
+                  onClick={handleLogout}
+                >
+                  <LogOut size={22} className="text-stone-500 group-hover:text-amber-50" />
+                  <span className="text-lg font-medium">Logout</span>
+                </button>
+              </>
+            ) : (
+              <a 
+                href="/login"
+                className="flex items-center gap-4 p-3 rounded-lg hover:bg-stone-800 hover:text-amber-50 text-stone-700 transition-all group"
+                onClick={closeSidebar}
+              >
+                <LogIn size={22} className="text-stone-500 group-hover:text-amber-50" />
+                <span className="text-lg font-medium">Login</span>
+              </a>
+            )}
           </nav>
 
           {/* Sidebar Footer */}

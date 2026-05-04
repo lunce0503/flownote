@@ -2,14 +2,20 @@ import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useCreateBlockNote } from "@blocknote/react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { BlockNoteSchema, type Block, defaultBlockSpecs } from "@blocknote/core";
+import { useEffect, useState } from "react";
+import {
+  BlockNoteSchema,
+  type Block,
+  defaultBlockSpecs,
+  defaultInlineContentSpecs,
+} from "@blocknote/core";
 import postNoteData from "../../../entities/blog/postNoteData";
-import { v4 as uuidv4 } from "uuid";
 import { useParams } from "react-router-dom";
 import getNoteData from "../../../entities/blog/getNoteData";
-import { API_BASE_URL2 } from "../../../shared/api";
+import { API_BASE_URL2, authHeaders } from "../../../shared/api";
 import axios from "axios";
+import { LatexInline } from "./LatexInline";
+import { transformLatexInlineContent } from "./latexTransform";
 
 interface BlockDataProps {
   id: string;
@@ -21,7 +27,9 @@ const uploadFile = async (file: File) => {
   const body = new FormData();
   body.append("file", file);
 
-  const response = await axios.post(`${API_BASE_URL2}/api/notes/upload`, body);
+  const response = await axios.post(`${API_BASE_URL2}/api/notes/upload`, body, {
+    headers: authHeaders(),
+  });
 
   const data = response.data;
   const finalUrl = `${API_BASE_URL2}${data.fileUrl}`;
@@ -32,14 +40,18 @@ const uploadFile = async (file: File) => {
 const  BlockNote = () => {
   const { title } = useParams<{title:string}>();
 
-  // const schema = BlockNoteSchema.create({
-  //   blockSpecs: {
-  //     ...defaultBlockSpecs,
-  //     math: Math,
-  //   }
-  // })
+  const schema = BlockNoteSchema.create({
+    blockSpecs: {
+      ...defaultBlockSpecs,
+    },
+    inlineContentSpecs: {
+      ...defaultInlineContentSpecs,
+      latex: LatexInline,
+    },
+  });
 
   const editor = useCreateBlockNote({
+    schema,
     uploadFile,    
   });
   const [noteData,setNoteData] = useState<BlockDataProps | null>(null);
@@ -85,9 +97,29 @@ const  BlockNote = () => {
     }); 
   }
 
+  const normalizeLatexInBlocks = (blocks: Block[]) => {
+    for (const block of blocks) {
+      if (Array.isArray(block.content)) {
+        const { changed, content } = transformLatexInlineContent(block.content);
+
+        if (changed) {
+          editor.updateBlock(block.id, {
+            content,
+          });
+        }
+      }
+
+      if (block.children.length > 0) {
+        normalizeLatexInBlocks(block.children);
+      }
+    }
+  }
 
   const handleNoteData = () => {
     if (!noteData) return;
+
+    normalizeLatexInBlocks(editor.document);
+
     const current = editor.document;
     const blockData : BlockDataProps= {
       ...noteData,

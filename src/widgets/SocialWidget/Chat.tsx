@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from "react";
 import axios from 'axios';
 import { ChatBlock, ChatSendBlock, type ChatMessage } from "../../shared/ui/ChatBlock";
 import { v4 as uuidv4 } from 'uuid';
-import { API_BASE_URL } from "../../shared/api";
+import { API_AI_BASE_URL } from "../../shared/api";
 import postChatData from "../../entities/chat/api/postChatData";
+import getChatData from "../../entities/chat/api/getChatData";
 
 const Chat = () => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -23,14 +24,14 @@ const Chat = () => {
     }
 
     const getMessages = async () => {
-            const response = await axios.get(`${API_BASE_URL}/api/chat`);
-            const data = Array.isArray(response.data) ? response.data : response.data.messages || [];
+            const response = await getChatData();
+            const data = Array.isArray(response) ? response : response.messages || [];
             setMessages(data); 
         };
 
     const askAgent = async () => {
         try{
-            const response = await fetch(`${API_BASE_URL}/api/aiclient/ask_stream`, {
+            const response = await fetch(`${API_AI_BASE_URL}/api/aiclient/ask_stream`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 // 현재 백엔드에서 받는 body가 없으므로 생략하거나 빈 객체 전달

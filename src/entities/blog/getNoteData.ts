@@ -1,9 +1,11 @@
 import axios from "axios";
-import { API_BASE_URL2 } from "../../shared/api";
+import { API_BASE_URL2, authHeaders } from "../../shared/api";
 
 const getNoteData = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL2}/api/notes`);
+        const response = await axios.get(`${API_BASE_URL2}/api/notes`, {
+            headers: authHeaders(),
+        });
         console.log("Fetched notes:", response.data);
         return response.data;
     } catch (error) {
