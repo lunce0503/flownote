@@ -10,6 +10,11 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+<<<<<<< HEAD
+=======
+test-results
+playwright-report
+>>>>>>> 678fcbf (separate repository to flownote-service)
 *.local
 
 # Editor directories and files
@@ -23,4 +28,9 @@ dist-ssr
 *.sln
 *.sw?
 .env
+<<<<<<< HEAD
 .tmp.driveupload/*
+=======
+.tmp.driveupload/*
+.vercel
+>>>>>>> 678fcbf (separate repository to flownote-service)

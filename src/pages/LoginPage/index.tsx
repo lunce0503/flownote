@@ -6,9 +6,15 @@ import {
   ArrowRight
 } from "lucide-react";
 import axios from "axios";
+<<<<<<< HEAD
 import { useNavigate } from "react-router-dom";
 import loginUserData from "../../entities/users/api/loginUserData";
 import { useAuth } from "../../shared/auth/AuthContext";
+=======
+import { Link, useNavigate } from "react-router-dom";
+import { loginUserData } from "@/entities/users";
+import { useAuth } from "@/features/auth";
+>>>>>>> 678fcbf (separate repository to flownote-service)
 
 export default function LoginPage() {
   const [email, setEmail] = useState<string>("");
@@ -38,6 +44,7 @@ export default function LoginPage() {
     }
   };
 
+<<<<<<< HEAD
   // Chrome 아이콘을 위한 인라인 SVG
   const ChromeIcon = () => (
     <svg
@@ -77,6 +84,8 @@ export default function LoginPage() {
     </svg>
   );
 
+=======
+>>>>>>> 678fcbf (separate repository to flownote-service)
   return (
     <div className="min-h-screen bg-amber-100 flex flex-col justify-center items-center p-4 font-sans">
       {/* 로고 섹션 */}
@@ -88,7 +97,11 @@ export default function LoginPage() {
         <p className="text-stone-600 text-sm">생각의 흐름을 기록하세요</p>
       </div>
 
+<<<<<<< HEAD
       {/* 로그인 카드 */}
+=======
+      {/* 로그인 폼 */}
+>>>>>>> 678fcbf (separate repository to flownote-service)
       <div className="w-full max-w-md bg-stone-50 rounded-3xl shadow-xl overflow-hidden">
         <div className="p-8">
           <h2 className="text-2xl font-bold text-stone-800 mb-6 text-center">로그인</h2>
@@ -119,9 +132,12 @@ export default function LoginPage() {
                 <label className="text-sm font-medium text-stone-700" htmlFor="password">
                   비밀번호
                 </label>
+<<<<<<< HEAD
                 <a href="#" className="text-xs text-stone-500 hover:text-amber-600 transition-colors">
                   비밀번호를 잊으셨나요?
                 </a>
+=======
+>>>>>>> 678fcbf (separate repository to flownote-service)
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={20} />
@@ -154,6 +170,7 @@ export default function LoginPage() {
             )}
           </form>
 
+<<<<<<< HEAD
           {/* 구분선 */}
           <div className="relative my-8 text-center">
             <hr className="border-stone-200" />
@@ -173,15 +190,23 @@ export default function LoginPage() {
               <span className="text-sm font-medium text-stone-700">Github</span>
             </button>
           </div>
+=======
+>>>>>>> 678fcbf (separate repository to flownote-service)
         </div>
 
         {/* 하단 푸터 */}
         <div className="bg-stone-100 p-6 text-center border-t border-stone-200">
           <p className="text-stone-600 text-sm">
             아직 계정이 없으신가요?{" "}
+<<<<<<< HEAD
             <a href="/signup" className="text-stone-800 font-bold hover:text-amber-600 transition-colors underline underline-offset-4">
               회원가입
             </a>
+=======
+            <Link to="/signup" className="text-stone-800 font-bold hover:text-amber-600 transition-colors underline underline-offset-4">
+              회원가입
+            </Link>
+>>>>>>> 678fcbf (separate repository to flownote-service)
           </p>
         </div>
       </div>

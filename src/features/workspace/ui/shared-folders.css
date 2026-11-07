@@ -1,0 +1,13 @@
+.shared-folder-tree {min-width:0;}
+.shared-folder-row {display:flex;align-items:center;min-width:0;}
+.shared-folder-row>button {display:flex;align-items:center;gap:6px;min-width:0;flex:1;min-height:44px;padding:6px 7px;color:var(--workspace-ink);border:0;background:transparent;text-align:left;}
+.shared-folder-row>button span {flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.shared-folder-row>button small {color:var(--workspace-muted);font-size:11px;}
+.shared-folder-row>button[aria-selected=true] {background:var(--workspace-selected);}
+.shared-folder-menu {position:relative;flex-shrink:0;}
+.shared-folder-menu summary {list-style:none;display:grid;place-items:center;min-width:44px;min-height:44px;cursor:pointer;}
+.shared-folder-menu summary::-webkit-details-marker {display:none;}
+.shared-folder-menu>div {position:absolute;top:100%;right:0;z-index:30;display:grid;min-width:210px;border:1px solid var(--workspace-border);background:var(--workspace-paper);border-radius:8px;box-shadow:0 5px 18px #0002;padding:5px;}
+.shared-folder-menu>div>button {min-height:44px;text-align:left;padding:8px;border:0;background:transparent;}
+.shared-folder-tree [role=group]>button {display:flex;align-items:center;gap:6px;max-width:100%;min-height:44px;padding:7px;border:0;background:transparent;color:var(--workspace-ink);}
+.shared-folder-tree [role=group]>button span {overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}

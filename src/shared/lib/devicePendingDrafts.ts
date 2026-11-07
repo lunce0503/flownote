@@ -1,0 +1,105 @@
+import { deviceOwner } from './deviceMode.ts';
+import { canvasDatabaseName } from './canvasStorageScope.ts';
+import type { DeviceWorkspace, WorkspaceSnapshot } from './deviceWorkspace.ts';
+
+type Stored = { key: IDBValidKey; value: unknown };
+export type DeviceDraftBackup = { notes: Stored[]; canvases: Stored[]; operations: Stored[] };
+
+// Read only existing stores. Aborting first creation avoids fabricating a
+// schema which would prevent the editor from creating its own database later.
+const readExisting = (name: string, stores: string[]): Promise<Record<string, Stored[]>> => new Promise((resolve, reject) => {
+  const request = indexedDB.open(name);
+  let absent = false;
+  request.onupgradeneeded = () => { absent = true; request.transaction?.abort(); };
+  request.onerror = () => absent ? resolve({}) : reject(new Error('기기 초안 저장소를 확인하지 못했습니다. 전환하지 않았습니다.'));
+  request.onblocked = () => reject(new Error('다른 창의 초안 저장이 끝난 뒤 다시 시도해주세요.'));
+  request.onsuccess = () => {
+    const db = request.result;
+    const names = stores.filter(name => db.objectStoreNames.contains(name));
+    if (!names.length) { db.close(); resolve({}); return; }
+    const tx = db.transaction(names, 'readonly');
+    const result: Record<string, Stored[]> = {};
+    for (const name of names) {
+      result[name] = [];
+      const cursor = tx.objectStore(name).openCursor();
+      cursor.onsuccess = () => {
+        if (!cursor.result) return;
+        result[name].push({ key: cursor.result.key, value: cursor.result.value });
+        cursor.result.continue();
+      };
+    }
+    tx.oncomplete = () => { db.close(); resolve(result); };
+    tx.onerror = tx.onabort = () => { db.close(); reject(new Error('기기 초안을 읽지 못해 전환하지 않았습니다.')); };
+  };
+});
+
+async function readDraftBackup(device: boolean, authorizedCanvasIds: string[] = []): Promise<DeviceDraftBackup> {
+  const owner = deviceOwner();
+  if (!owner) throw new Error('기기 초안 계정을 확인해주세요.');
+  const [notes, canvas] = await Promise.all([
+    readExisting(device ? `flownote-note-drafts-device:${owner}` : 'flownote-note-drafts', ['drafts']),
+    readExisting(canvasDatabaseName(owner,device), ['drafts', 'operations']),
+  ]);
+  if (deviceOwner() !== owner) throw new Error('계정이 변경되어 초안 읽기를 중단했습니다.');
+  const canvases = canvas.drafts ?? [], operations = canvas.operations ?? [];
+  if (!device && authorizedCanvasIds.length) {
+    // The fresh cloud snapshot authorizes these IDs. Unowned legacy data from
+    // other accounts is never returned or copied into this account's backup.
+    const ids = new Set(authorizedCanvasIds);
+    const migrated = new Set(operations.filter(entry=>typeof entry.key==='string' && entry.key.startsWith('legacyMigrated:') && entry.value===true).map(entry=>String(entry.key).slice('legacyMigrated:'.length)));
+    const legacy = await readExisting('flownote-canvas',['drafts','operations']);
+    canvases.push(...(legacy.drafts ?? []).filter(entry=>typeof entry.key==='string' && ids.has(entry.key) && !migrated.has(entry.key)));
+    for (const entry of legacy.operations ?? []) {
+      if (entry.key!=='retryQueue' || !Array.isArray(entry.value)) continue;
+      const value = entry.value.filter(item=>item && typeof item==='object' && ids.has(item.canvasId) && !migrated.has(item.canvasId));
+      if (value.length) operations.push({key:'retryQueue',value});
+    }
+  }
+  if (deviceOwner() !== owner) throw new Error('계정이 변경되어 초안 읽기를 중단했습니다.');
+  return { notes: (notes.drafts ?? []).filter(entry=>(entry.value as {userId?:string}|undefined)?.userId===owner), canvases, operations };
+}
+
+export const readDeviceDraftBackup = (): Promise<DeviceDraftBackup> => readDraftBackup(true);
+export const readCloudDraftBackup = (authorizedCanvasIds:string[] = []): Promise<DeviceDraftBackup> => readDraftBackup(false,authorizedCanvasIds);
+
+/** OFF must not hide the cloud editor's pending input behind a new storage namespace. */
+export const pendingCloudDraftMessage = (cloud: WorkspaceSnapshot, backup: DeviceDraftBackup): string => {
+  const owner = deviceOwner();
+  for (const entry of backup.notes) {
+    const draft = entry.value as { userId?: string; note?: { id?: string; title?: string; content?: unknown } } | undefined;
+    if (!draft?.note?.id || draft.userId !== owner) continue;
+    const saved = cloud.notes.find(note => note.id === draft.note!.id);
+    if (!saved || saved.title !== draft.note.title || JSON.stringify(saved.content) !== JSON.stringify(draft.note.content)) {
+      return `“${draft.note.title || '노트'}”에 서버에 저장되지 않은 초안이 있어 동기화를 끄지 않았습니다. 해당 노트에서 초안을 복구·저장하거나 내보낸 뒤 다시 시도해주세요. 초안은 그대로 보존했습니다.`;
+    }
+  }
+  // Both modes use an owner-scoped cache. Keep matching the current snapshot
+  // before blocking a transition so unrelated/deleted documents do not block it.
+  const canvasIds = new Set(cloud.canvases.map(canvas => canvas.id));
+  if (backup.canvases.some(entry => typeof entry.key === 'string' && canvasIds.has(entry.key)
+    && (entry.value as { hasPendingChanges?: boolean } | undefined)?.hasPendingChanges)) {
+    return '캔버스에 서버에 저장되지 않은 초안이 있어 동기화를 끄지 않았습니다. 해당 캔버스를 저장·복구한 뒤 다시 시도해주세요. 초안은 보존했습니다.';
+  }
+  const pending = backup.operations.some(entry => entry.key === 'retryQueue' && Array.isArray(entry.value)
+    && entry.value.some(item => item && typeof item === 'object' && canvasIds.has(item.canvasId)));
+  return pending ? '캔버스에 서버 저장 대기 변경이 있어 동기화를 끄지 않았습니다. 해당 캔버스에서 재시도·복구한 뒤 다시 시도해주세요. 대기 변경은 보존했습니다.' : '';
+};
+
+export const pendingDeviceDraftMessage = (workspace: DeviceWorkspace, backup: DeviceDraftBackup): string => {
+  for (const entry of backup.notes) {
+    const draft = entry.value as { userId?: string; note?: { id?: string; title?: string; content?: unknown } } | undefined;
+    if (!draft?.note?.id || draft.userId !== deviceOwner()) continue;
+    const stored = workspace.notes.find(note => note.id === draft.note!.id);
+    if (!stored || stored.title !== draft.note.title || JSON.stringify(stored.content) !== JSON.stringify(draft.note.content)) {
+      return `“${draft.note.title || '노트'}”에 미저장 초안이 있습니다. 해당 노트의 초안을 복구·저장한 뒤 동기화를 켜주세요. 초안과 기기 원본은 보존했고 JSON 백업에도 포함됩니다.`;
+    }
+  }
+  for (const entry of backup.canvases) {
+    const draft = entry.value as { hasPendingChanges?: boolean } | undefined;
+    if (draft?.hasPendingChanges) return '캔버스에 미저장 초안이 있습니다. 해당 캔버스의 저장·복구 상태를 확인한 뒤 동기화를 켜주세요. 초안과 기기 원본은 보존했습니다.';
+  }
+  if (backup.operations.some(entry => entry.key === 'retryQueue' && Array.isArray(entry.value) && entry.value.length)) {
+    return '캔버스에 저장 대기 변경이 있습니다. 캔버스에서 재시도·복구한 뒤 동기화를 켜주세요. 대기 변경은 보존했습니다.';
+  }
+  return '';
+};

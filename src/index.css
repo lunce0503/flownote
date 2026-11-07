@@ -13,9 +13,43 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+<<<<<<< HEAD
 body {
   padding: 0;
   margin: 0;
+=======
+:root[data-font-scale="large"] {
+  font-size: 18px;
+}
+
+:root[data-density="compact"] body {
+  line-height: 1.35;
+}
+
+.motion-reduced *,
+.motion-reduced *::before,
+.motion-reduced *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.01ms !important;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  background: #111111;
+}
+
+.theme-light body {
+  background: #f4f4f5;
+  color: #18181b;
+}
+
+.theme-dark body {
+  background: #111111;
+  color: #f5f5f4;
+>>>>>>> 678fcbf (separate repository to flownote-service)
 }
 
 h1 {
@@ -26,4 +60,8 @@ h1 {
 input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   filter: brightness(0);
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 678fcbf (separate repository to flownote-service)

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import BlockNote from "../../widgets/BlogWidget/BlockNote";
 
 const BlogDetailPage = () => {
@@ -11,3 +12,7 @@ const BlogDetailPage = () => {
 };
 
 export default BlogDetailPage;
+=======
+import MarkdownWorkspace from '@/widgets/BlogWidget/MarkdownWorkspace/MarkdownWorkspace';
+export default MarkdownWorkspace;
+>>>>>>> 678fcbf (separate repository to flownote-service)

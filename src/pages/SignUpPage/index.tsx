@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import SignUpWidget from "../../widgets/SignUpWidget";
 const SignUpPage = () => {
     return (
@@ -8,6 +9,12 @@ const SignUpPage = () => {
             </div>
         </div>
     );
+=======
+import SignUpWidget from "@/widgets/SignUpWidget";
+
+const SignUpPage = () => {
+    return <SignUpWidget />;
+>>>>>>> 678fcbf (separate repository to flownote-service)
 }
 
 export default SignUpPage;

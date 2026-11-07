@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import BlogList from "../../widgets/BlogWidget/BlogList";
 
 const BlogPage = () => {
@@ -11,3 +12,7 @@ const BlogPage = () => {
 };
 
 export default BlogPage;
+=======
+import { CanvasList } from '@/widgets/CanvasWidget';
+export default CanvasList;
+>>>>>>> 678fcbf (separate repository to flownote-service)
