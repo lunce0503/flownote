@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, ChevronDown, ChevronRight, Clock3, Ellipsis, FilePlus2, FileText, Files, Folder, FolderPlus, Loader2, PanelLeft, PanelsTopLeft, Pencil, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
-import { addNoteToFolder, deleteNote, deleteNoteFolder, getNoteFolders, getNoteSummaries, noteDrafts, postNoteData, removeNoteFromFolder, updateNoteFolder, updateNoteTitle, type NoteSummary, type NoteFolder } from '@/entities/blog';
+import { Check, ChevronDown, ChevronRight, Clock3, Ellipsis, FileCode2, Upload, FilePlus2, FileText, Files, Folder, FolderPlus, Loader2, PanelLeft, PanelsTopLeft, Pencil, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
+import { addNoteToFolder, deleteNote, deleteNoteFolder, getNoteFolders, getNoteSummaries, noteDrafts, postNoteData, removeNoteFromFolder, updateNoteFolder, updateNoteTitle, CODE_FILE_ACCEPT, newCodeContent, readCodeFile, assertCodeNoteFits, type BlockDataProps, type NoteSummary, type NoteFolder } from '@/entities/blog';
 import { useAuth } from '@/features/auth';
-import { pauseNoteSave, waitForNoteSave } from '@/features/blog';
+import { pauseNoteSave, waitForNoteSave, CodeFileDialog } from '@/features/blog';
 import { getAuthUser } from '@/shared/api';
 import { newWorkspaceId } from '@/shared/lib/deviceMode';
 import { getSyncClientId } from '@/shared/lib/sync';
@@ -47,6 +47,8 @@ export default function CanvasList() {
 function WorkspaceList({ owner }: { owner: string }) {
     const navigate = useNavigate();
     const noteCreating = useRef(false);
+    const [codeDialog, setCodeDialog] = useState(false);
+    const codeInput = useRef<HTMLInputElement>(null);
     const [location, setLocation] = useState('recent');
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [search, setSearch] = useState('');
@@ -306,13 +308,17 @@ function WorkspaceList({ owner }: { owner: string }) {
         }
     };
     const moveCanvas=(id:string,target:string)=>moveFile('canvas',id,target);
-    const handleCreateNote = async () => {
+    const handleCreateNote = async (document: Pick<BlockDataProps, 'title' | 'content'> = {
+        title: '제목 없음', content: { format: 'markdown', version: 1, markdown: '' },
+    }) => {
         if (isCreating || noteCreating.current) return;
         noteCreating.current = true;
         setIsCreating(true); setError(null);
         try {
-            const saved = await postNoteData({ id: newWorkspaceId(), title: '제목 없음', content: { format: 'markdown', version: 1, markdown: '' },
-                created_at: new Date().toISOString(), revision: 1, client_id: getSyncClientId() });
+            if (getAuthUser()?.id !== owner) return;
+            const request = { ...document, id: newWorkspaceId(), created_at: new Date().toISOString(), revision: 1, client_id: getSyncClientId() };
+            assertCodeNoteFits(request);
+            const saved = await postNoteData(request);
             if (getAuthUser()?.id !== owner) return;
             let warning = '';
             if(selectedSharedFolder){try{await moveSharedMember(selectedSharedFolder,'note',saved.id);}catch{warning='노트는 만들었지만 공통 폴더에 넣지 못했습니다. 미분류에서 이동을 다시 시도하세요.';}}
@@ -326,6 +332,16 @@ function WorkspaceList({ owner }: { owner: string }) {
             setError('파일 작업에 실패했습니다. 노트를 만들지 못했으며 기존 목록은 유지했습니다.');
         }
         finally { noteCreating.current = false; setIsCreating(false); }
+    };
+    const importCodeFile = async (file: File) => {
+        if (noteCreating.current) return;
+        noteCreating.current = true;
+        setIsCreating(true); setError(null);
+        let document: Awaited<ReturnType<typeof readCodeFile>> | undefined;
+        try { document = await readCodeFile(file); }
+        catch (error) { setError(error instanceof Error ? error.message : '파일을 읽지 못했습니다.'); }
+        finally { noteCreating.current = false; setIsCreating(false); }
+        if (document) await handleCreateNote(document);
     };
     const beginRename = (document: WorkspaceFile) => {
         setEditingCanvasId(workspaceFileKey(document)); setEditingCanvasTitle(document.title);
@@ -416,6 +432,12 @@ function WorkspaceList({ owner }: { owner: string }) {
             <div className="canvas-topbar-actions">
                 <button className="canvas-new-document" aria-label="새 캔버스" onClick={() => void handleCreateCanvas(selectedFolder?.id)} disabled={isCreating}><Plus size={16} /><span>새 캔버스</span></button>
                 <button aria-label="새 노트" title="새 노트" onClick={() => void handleCreateNote()} disabled={isCreating}><FilePlus2 size={19} /></button>
+                <button aria-label="새 코드 파일" title="새 코드 파일" onClick={() => setCodeDialog(true)} disabled={isCreating}><FileCode2 size={19} /></button>
+                <button aria-label="코드 파일 가져오기" title="코드 파일 가져오기" onClick={() => codeInput.current?.click()} disabled={isCreating}><Upload size={19} /></button>
+                <input ref={codeInput} type="file" hidden aria-label="코드 파일 선택" accept={CODE_FILE_ACCEPT} disabled={isCreating} onChange={event => {
+                    const file = event.currentTarget.files?.[0]; event.currentTarget.value = '';
+                    if (file) void importCodeFile(file);
+                }} />
                 <button aria-label="새 폴더" title="새 폴더" onClick={() => { folderCreateRequest.current=null; setShowFolderForm(value => !value); setEditingFolderId(null); }}><FolderPlus size={18} /></button>
             </div>
         </header>
@@ -507,5 +529,8 @@ function WorkspaceList({ owner }: { owner: string }) {
                 <footer className="canvas-library-status">{locationName}<span>{visibleDocuments.length}개 항목</span></footer>
             </main>
         </div>
+        {codeDialog && <CodeFileDialog close={() => setCodeDialog(false)} create={(title, language) => {
+            setCodeDialog(false); void handleCreateNote({ title, content: newCodeContent(language) });
+        }} />}
     </section>;
 }

@@ -1,11 +1,18 @@
-import { useRef, useState, useLayoutEffect } from 'react';
+import { useRef, useState, useLayoutEffect, useEffect } from 'react';
 import {readNoteImage, imageMarkdown, assertImageFits} from '@/entities/blog';
+import { textareaNoteTools } from './noteTextSelection';
+import type { RegisterNoteTools } from './noteMobileTools';
 import NoteImageControl from './NoteImageControl';
 import LatexSuggestions from './LatexSuggestions';
 import { latexCompletion, replaceCompletion, type LatexCommand } from './mathInput';
 
-export default function MarkdownSource({ value, disabled, onChange, validateImage }: { value: string; disabled: boolean; onChange: (value: string) => void; validateImage?: (markdown: string, src: string) => void }) {
+export default function MarkdownSource({ value, disabled, onChange, validateImage, registerTools }: { registerTools?: RegisterNoteTools; value: string; disabled: boolean; onChange: (value: string) => void; validateImage?: (markdown: string, src: string) => void }) {
   const input = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    if (!input.current || !registerTools) return;
+    registerTools(textareaNoteTools(input.current));
+    return () => registerTools(null);
+  }, [registerTools]);
   const [cursor, setCursor] = useState(0), [dismissed, setDismissed] = useState('');
   const [imageBusy,setImageBusy]=useState(false),[imageError,setImageError]=useState('');
   const latest=useRef({value,disabled,onChange,validateImage}), mounted=useRef(false), reading=useRef(false);

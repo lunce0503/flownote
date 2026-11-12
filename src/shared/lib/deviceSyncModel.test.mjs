@@ -122,3 +122,19 @@ test('sync plans remap device ids consistently and keep a resumable ordered oper
   assert.ok(plan.operations.find(op => op.collection === 'canvasContents' && op.itemId === mappedCanvas));
   assert.ok(plan.operations.find(op => op.collection === 'noteFolders'));
 });
+
+test('code source conflicts keep the more edited text and a complete recoverable loser', () => {
+  const base = createDeviceWorkspace();
+  const content = { format: 'code', version: 1, text: 'print("base")\r\n', language: 'python', encoding: 'utf-16le' };
+  base.notes.push({ id: 'code-source', title: 'source.py', revision: 1, content });
+  const local = structuredClone(base);
+  local.notes[0].content.text = 'def compute(value):\r\n    result = value * 3\r\n    print(result)\r\n    return result\r\n';
+  const remote = structuredClone(base);
+  remote.notes[0].content.text = 'print("remote")\r\n';
+  const result = reconcileWorkspace(base, local, remote, 'code-source-conflict');
+  assert.deepEqual(result.workspace.notes[0].content, local.notes[0].content);
+  assert.equal(result.workspace.notes[0].title, 'source.py');
+  assert.equal(result.conflicts.length, 1);
+  assert.equal(result.conflicts[0].winner, 'local');
+  assert.deepEqual(result.conflicts[0].loser.content, remote.notes[0].content);
+});

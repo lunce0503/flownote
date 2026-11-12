@@ -10,3 +10,5 @@ yarn build
 ```
 
 Vercel project는 `flownote-react`, production URL은 `https://flownote-react.vercel.app`이다. `VITE_*` 변수는 브라우저 번들에 포함되므로 비밀값을 넣지 않는다.
+
+통합 검증 및 배포 절차는 [flownote-platform](https://github.com/lunce0503/flownote-platform)에서 관리한다.

@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 import { fileURLToPath, URL } from 'node:url'
->>>>>>> 678fcbf (separate repository to flownote-service)
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
@@ -9,14 +6,6 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-<<<<<<< HEAD
-    react(), 
-    tailwindcss()
-  ],
-  server:{
-    host: process.env.VITE_DEV_HOST ?? '0.0.0.0',
-    port: Number(process.env.VITE_DEV_PORT ?? 5173)
-=======
     react(),
     tailwindcss()
   ],
@@ -38,6 +27,5 @@ export default defineConfig({
         },
       },
     },
->>>>>>> 678fcbf (separate repository to flownote-service)
   },
 })

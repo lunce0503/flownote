@@ -1,3 +1,4 @@
+import { isCodeContent } from './codeContent.ts';
 export type Item = Record<string, unknown> & { id: string };
 export type CanvasSnapshot = Item & { lines: Item[]; images: Item[]; textBoxes: Item[]; revision: number;
   lastMutation?: { id: string; payload: string; revision: number } };
@@ -136,7 +137,7 @@ export function handleDeviceRequest(state: DeviceWorkspace, method: string, path
   if (resource === 'notes' && parts.length <= 2) {
     if (verb === 'GET') {
       if (id) return find(state.notes, id);
-      if (url.searchParams.get('view') === 'summary') return { notes: state.notes.map(note => ({ id: note.id, title: note.title, revision: note.revision, created_at: note.created_at, updated_at: note.updated_at })) };
+      if (url.searchParams.get('view') === 'summary') return { notes: state.notes.map(note => ({ id: note.id, title: note.title, revision: note.revision, created_at: note.created_at, updated_at: note.updated_at, content_format: record(note.content).format ?? 'blocknote' })) };
       return state.notes;
     }
     if (verb === 'POST' || verb === 'PATCH') {
@@ -146,7 +147,9 @@ export function handleDeviceRequest(state: DeviceWorkspace, method: string, path
       const revision = typeof body.revision === 'number' ? body.revision : Number(existing?.revision ?? 0) + 1;
       if (revision !== Number(existing?.revision ?? 0) + 1) throw new Error('노트 저장 충돌 — 기기 원본을 다시 확인해주세요.');
       const note: Item = { ...existing, ...body, id: noteId, revision, created_at: existing?.created_at ?? now(), updated_at: now() };
-      if (typeof note.title !== 'string' || (!Array.isArray(note.content) && typeof record(note.content).markdown !== 'string')) throw new Error('지원하지 않는 노트 형식입니다.');
+      const previousFormat = record(existing?.content).format;
+      if ((previousFormat === 'markdown' || previousFormat === 'code') && record(note.content).format !== previousFormat) throw new Error('노트 형식이 변경됐습니다. 원본을 다시 확인해주세요.');
+      if (typeof note.title !== 'string' || (!Array.isArray(note.content) && typeof record(note.content).markdown !== 'string' && !isCodeContent(note.content))) throw new Error('지원하지 않는 노트 형식입니다.');
       state.notes = [...state.notes.filter(item => item.id !== noteId), note];
       return note;
     }

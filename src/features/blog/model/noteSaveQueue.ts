@@ -38,7 +38,7 @@ export function createNoteSaveQueue(owner: string, initial: BlockDataProps, save
       } catch (error) {
         blocked = true;
         conflict = (error as { response?: { status?: number } }).response?.status === 409;
-        notify(conflict ? '충돌 — 서버본 확인 후 초안을 복구하세요' : '저장 실패 — 기기 초안 또는 .md 내보내기를 확인하세요');
+        notify(conflict ? '충돌 — 서버본 확인 후 초안을 복구하세요' : '저장 실패 — 기기 초안 또는 파일 내보내기를 확인하세요');
       } finally {
         saving = false;
         if (blocked && active.get(keyFor(owner, initial.id)) === queue) active.delete(keyFor(owner, initial.id));

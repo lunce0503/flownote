@@ -21,6 +21,7 @@ import MathComposer, { type MathDraft } from './MathComposer';
 import { markdownSync } from './markdownSync';
 import { separateAdjacentInlineMath } from './mathSerialization';
 import { singleLineBoundary } from './singleLineNavigation';
+import { lassoCharacterRange, type NoteTextSegment, type RegisterNoteTools } from './noteMobileTools';
 import NoteImageControl from './NoteImageControl';
 
 const serialize = (editor: Editor) => editor.markdown!.serialize(separateAdjacentInlineMath(editor.getJSON()));
@@ -36,7 +37,8 @@ const SafeImage = Image.extend({
   renderMarkdown: node => imageMarkdown({src:String(node.attrs?.src??''),alt:String(node.attrs?.alt??''),title:node.attrs?.title??undefined}),
 });
 
-export default function LiveMarkdownEditor({ value, disabled, toolsOpen, onChange, validateImage }: {
+export default function LiveMarkdownEditor({ value, disabled, toolsOpen, onChange, validateImage, registerTools }: {
+  registerTools?: RegisterNoteTools;
   value: string; disabled: boolean; toolsOpen: boolean; onChange: (markdown: string) => void; validateImage?: (markdown: string, src: string) => void;
 }) {
   const lastChange = useRef(value);
@@ -178,6 +180,38 @@ export default function LiveMarkdownEditor({ value, disabled, toolsOpen, onChang
     // Recovery or explicit source changes are applied without producing a second save or resetting a typing cursor.
     editor.commands.setContent(value, { contentType: 'markdown', emitUpdate: false }); lastChange.current = value;
   }, [editor, value, sync]);
+  useEffect(() => {
+    if (!editor || !registerTools) return;
+    const selectedText = () => editor.state.doc.textBetween(editor.state.selection.from, editor.state.selection.to, '\n');
+    registerTools({
+      placeCaret: point => {
+        const position = editor.view.posAtCoords({ left: point.x, top: point.y })?.pos;
+        if (position !== undefined) editor.commands.setTextSelection(position);
+        editor.view.focus();
+      },
+      focus: () => editor.view.focus(), selectedText,
+      undo: () => { if (!latest.current.disabled) { editedViews.add(editor.view); editor.commands.undo(); } },
+      selectAll: () => { editor.commands.selectAll(); return selectedText(); },
+      selectLasso: points => {
+        const segments: NoteTextSegment[] = [];
+        editor.state.doc.descendants((node, position) => {
+          if (!node.isText || !node.text?.length) return;
+          const range = document.createRange();
+          segments.push({ from: position, length: node.text.length, rectAt: offset => {
+            const start = editor.view.domAtPos(position + offset, 1);
+            const end = editor.view.domAtPos(position + offset + 1, -1);
+            range.setStart(start.node, start.offset); range.setEnd(end.node, end.offset);
+            return range.getBoundingClientRect();
+          } });
+        });
+        const selected = lassoCharacterRange(points, editor.view.dom.getBoundingClientRect(), segments);
+        if (!selected) return '';
+        editor.commands.setTextSelection(selected);
+        return selectedText();
+      },
+    });
+    return () => registerTools(null);
+  }, [editor, registerTools]);
   if (!editor) return <p role="status">편집기를 준비하고 있습니다…</p>;
   return <div className="note-live-editor" data-testid="markdown-live-editor">
     {toolsOpen && <div className="note-live-formatting" role="toolbar" aria-label="Markdown 서식">

@@ -1,0 +1,22 @@
+.note-interaction { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 300px; }
+.note-view-tools { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; padding: 5px 10px; background: var(--workspace-sidebar); border-bottom: 1px solid var(--workspace-border); }
+.note-view-tools button { min-height: 40px; min-width: 40px; font-size: 12px; }
+.note-view-tools [aria-pressed=true] { background: var(--workspace-selected); }
+.note-viewport { flex: 1; min-height: 260px; height: 64dvh; overflow: auto; overscroll-behavior: contain; touch-action: none; position: relative; -webkit-touch-callout: none; }
+.note-zoom-content { min-height: 100%; display: flex; flex-direction: column; }
+.note-zoom-content > .note-code-editor { height: max(320px, 55dvh); flex: none; }
+.note-view-status { padding: 4px 10px; font-size: 11px; color: var(--workspace-muted); }
+.note-lasso-overlay { position: fixed; pointer-events: none; z-index: 50; overflow: hidden; }
+.note-lasso-overlay polygon { fill: #c8b79533; stroke: var(--workspace-ink); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.note-quick-menu { position: fixed; z-index: 70; pointer-events: none; color: var(--workspace-ink); }
+.note-quick-center,.note-quick-item { position: absolute; display: flex; align-items: center; justify-content: center; transform: translate(-50%,-50%); border: 1px solid var(--workspace-border); border-radius: 50%; background: var(--workspace-sidebar); box-shadow: 0 3px 12px #0002; }
+.note-quick-center { left: 50%; top: 50%; width: 64px; height: 64px; font-size: 11px; text-align: center; }
+.note-quick-item { width: 52px; height: 52px; flex-direction: column; gap: 2px; font-size: 9px; }
+.note-quick-item[data-selected=true] { background: var(--workspace-ink); color: var(--workspace-paper); }
+@media(max-width:700px) { .note-view-tools { padding: 4px; } .note-view-tools button { min-width: 40px; min-height: 44px; padding: 5px; } }
+/* Inner editor scrollers participate in touch-action negotiation before the
+   outer viewport. Keep touch ownership on the note tools through the gesture. */
+.note-viewport .cm-scroller,
+.note-viewport .cm-content,
+.note-viewport .note-live-content,
+.note-viewport textarea[aria-label="Markdown 본문"] { touch-action: none !important; }

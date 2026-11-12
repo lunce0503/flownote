@@ -1,15 +1,4 @@
 import axios from "axios";
-<<<<<<< HEAD
-import { API_BASE_URL2, authHeaders } from "../../../shared/api";
-
-const getTasksData = async () => {
-    try {
-            const response = await axios.get(`${API_BASE_URL2}/api/tasks`, {
-                headers: authHeaders(),
-            });
-            console.log("Fetched tasks:", response.data);
-            return response.data;
-=======
 import { API_CORE_BASE_URL, authHeaders } from "@/shared/api";
 import type { TaskProps } from "../model/types";
 
@@ -52,7 +41,6 @@ const getTasksData = async (): Promise<TaskProps[]> => {
             }
 
             return tasks;
->>>>>>> 678fcbf (separate repository to flownote-service)
         } catch (error) {
             console.error("Error fetching tasks:", error);
             return [];

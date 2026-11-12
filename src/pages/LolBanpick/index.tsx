@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, Trophy, ShieldAlert, X } from 'lucide-react';
-=======
 import { useState, useEffect, useMemo } from 'react';
 import { Search, Trophy, ShieldAlert, X } from 'lucide-react';
->>>>>>> 678fcbf (separate repository to flownote-service)
 
 // --- Types ---
 interface Champion {
@@ -72,11 +67,7 @@ export default function BanPickPage() {
         const cRes = await fetch(`https://ddragon.leagueoflegends.com/cdn/${currentVersion}/data/ko_KR/champion.json`);
         const cData = await cRes.json();
         setChampions(Object.values(cData.data));
-<<<<<<< HEAD
-      } catch (err) {
-=======
       } catch {
->>>>>>> 678fcbf (separate repository to flownote-service)
         setError("챔피언 데이터를 불러오지 못했습니다.");
       }
     };
@@ -307,8 +298,4 @@ function TeamSection({ team, data, active }: {
       </div>
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 678fcbf (separate repository to flownote-service)

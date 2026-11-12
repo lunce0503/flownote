@@ -1,5 +1,5 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { convertLegacy, assertImageFits, assertNoteImageSaveFits, isMarkdown, noteDrafts, recoveryState, getNote, postNoteData } from '@/entities/blog';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { convertLegacy, assertImageFits, assertNoteImageSaveFits, isMarkdown, noteDrafts, recoveryState, getNote, postNoteData, isCodeContent, noteFileName, assertCodeNoteFits } from '@/entities/blog';
 import type { BlockDataProps, NoteDraft } from '@/entities/blog';
 import { useDocumentTitle } from '@/shared/lib/useDocumentTitle';
 import { getAuthUser } from '@/shared/api';
@@ -8,11 +8,14 @@ import { getSyncClientId, subscribeSyncEvents } from '@/shared/lib/sync';
 import { createNoteSaveQueue, waitForNoteSave } from '@/features/blog';
 import { Code, Columns2, Download, Eye, MoreVertical, Pencil, RefreshCw, SlidersHorizontal } from 'lucide-react';
 import MarkdownSource from './MarkdownSource';
+import NoteInteraction from './NoteInteraction';
+import type { NoteTextTools, RegisterNoteTools } from './noteMobileTools';
 
-import { downloadNote } from './downloadNote';
+import { downloadNote, downloadCodeNote } from './downloadNote';
 
 const Preview = lazy(() => import('./MarkdownPreview'));
 const LiveEditor = lazy(() => import('./LiveMarkdownEditor'));
+const CodeEditor = lazy(() => import('./CodeEditor'));
 
 type RegisterRename = (rename: ((title: string) => void) | null) => void;
 export default function NoteEditor({ owner, id, onSaved, registerRename }: { owner: string; id: string; onSaved: (saved: BlockDataProps) => void; registerRename: RegisterRename }) {
@@ -45,6 +48,9 @@ export default function NoteEditor({ owner, id, onSaved, registerRename }: { own
       {isMarkdown(failedDraft.note.content) && <button onClick={() => {
         if (isMarkdown(failedDraft.note.content)) downloadNote(`${failedDraft.note.title}-draft.md`, failedDraft.note.content.markdown);
       }}>기기 초안 .md 내보내기</button>}
+      {isCodeContent(failedDraft.note.content) && <button onClick={() => {
+        if (isCodeContent(failedDraft.note.content)) downloadCodeNote(noteFileName(failedDraft.note), failedDraft.note.content);
+      }}>기기 초안 파일 내보내기</button>}
     </>}
   </div>;
   if (!loaded) return <p role="status">선택한 노트를 불러오는 중…</p>;
@@ -57,6 +63,8 @@ function Editor({ owner, initial, draft, draftError, onSaved, reload, registerRe
 }) {
   const state = draft ? recoveryState(draft, initial) : 'matched';
   const [note, setNote] = useState(initial);
+  const editorTools = useRef<NoteTextTools | null>(null);
+  const registerTools = useCallback<RegisterNoteTools>(tools => { editorTools.current = tools; }, []);
   useDocumentTitle("노트", note.title);
   const noteRef = useRef(initial);
   const [recovery, setRecovery] = useState(state !== 'matched' ? draft : null);
@@ -88,22 +96,25 @@ function Editor({ owner, initial, draft, draftError, onSaved, reload, registerRe
     return () => { window.removeEventListener('beforeunload', beforeUnload); unsubscribe(); queue.pause(); };
   }, [owner, initial.id, queue, draft, state]);
   const change = (next: BlockDataProps) => {
+    try { assertCodeNoteFits(next); } catch (error) { setStatus(error instanceof Error ? error.message : '코드 파일의 크기를 확인해주세요.'); return; }
     noteRef.current = next; setNote(next);
-    try { queue.capture(next); } catch { setStatus('기기 보관 실패 — .md 내보내기를 사용하세요'); }
+    try { queue.capture(next); } catch { setStatus('기기 보관 실패 — 파일 내보내기를 사용하세요'); }
   };
   useEffect(() => {
     registerRename(title => {
       if (recovery || needsReview) throw new Error('초안과 서버 변경을 먼저 확인하세요.');
       const next = { ...noteRef.current, title };
+      assertCodeNoteFits(next);
       noteRef.current = next; setNote(next); queue.capture(next);
     });
     return () => registerRename(null);
   }, [registerRename, recovery, needsReview, queue]);
+  const code = isCodeContent(note.content) ? note.content : null;
   const markdown = isMarkdown(note.content) ? note.content : null;
   const legacy = Array.isArray(note.content) ? note.content : markdown?.legacy_original;
   const converted = Array.isArray(note.content) ? convertLegacy(note.content) : null;
   const validateImage=(value:string,src:string)=>assertImageFits(value,src,noteRef.current);
-  return <div className="note-document" data-note-id={initial.id}>
+  return <div className={`note-document${code ? ' note-document-code' : ''}`} data-note-id={initial.id}>
     {(recovery || needsReview) && <div className="note-notice" role="alert">
       {recovery ? '기기에 저장된 입력이 있습니다. 서버본과 초안을 확인한 뒤 선택하세요.' : '다른 창의 변경을 확인해야 합니다. 자동 저장을 멈췄습니다.'}
       {recovery && <>
@@ -138,10 +149,11 @@ function Editor({ owner, initial, draft, draftError, onSaved, reload, registerRe
         {mode !== 'preview' && <button aria-label="편집 도구" title="편집 도구" aria-expanded={toolsOpen} aria-controls="note-input-tools" onClick={() => setToolsOpen(value => !value)}><SlidersHorizontal size={18} /></button>}
       </>}
       <details className="note-settings-menu"><summary aria-label="노트 세부 설정" title="노트 세부 설정"><MoreVertical size={19} /></summary><div onClick={event => { if ((event.target as Element).closest('button')) event.currentTarget.closest('details')?.removeAttribute('open'); }}>
-        {markdown && <>
-          <button onClick={() => downloadNote(`${note.title.replace(/\.md$/i, '') || 'note'}.md`, markdown.markdown)}><Download size={16} />.md 내보내기</button>
+        {code && <button onClick={() => downloadCodeNote(noteFileName(note), code)}><Download size={16} />파일 내보내기</button>}
+        {(markdown || code) && <>
+          {markdown && <button onClick={() => downloadNote(`${note.title.replace(/\.md$/i, '') || 'note'}.md`, markdown.markdown)}><Download size={16} />.md 내보내기</button>}
           <button disabled={!!recovery || needsReview} onClick={() => queue.retry()}><RefreshCw size={16} />저장 다시 시도</button>
-          <button onClick={() => { if (!queue.hasPending || window.confirm('미저장 입력이 있습니다. 저장 실패가 있다면 먼저 .md로 내보내세요. 서버본과 기기 초안을 다시 확인할까요?')) reload(); }}>서버본·초안 확인</button>
+          <button onClick={() => { if (!queue.hasPending || window.confirm('미저장 입력이 있습니다. 저장 실패가 있다면 먼저 파일로 내보내세요. 서버본과 기기 초안을 다시 확인할까요?')) reload(); }}>서버본·초안 확인</button>
         </>}
         {legacy && <>
           <button aria-expanded={original} onClick={() => setOriginal(value => !value)}>원본 보기</button>
@@ -154,6 +166,13 @@ function Editor({ owner, initial, draft, draftError, onSaved, reload, registerRe
       <button aria-label="원문" title="Markdown 원문" aria-pressed={mode === 'source'} onClick={() => setMode('source')}><Code size={17} /><span>원문</span></button>
       <button aria-label="나란히" title="원문과 미리보기 나란히" aria-pressed={mode === 'split'} onClick={() => setMode('split')}><Columns2 size={17} /><span>나란히</span></button>
     </div>}
+    <NoteInteraction disabled={!!recovery || needsReview} editorTools={editorTools}
+      onEdit={() => { if (markdown && mode === 'preview') setMode('edit'); }}>
+    {code && <Suspense fallback={<p role="status">코드 편집기 준비 중…</p>}>
+      <CodeEditor registerTools={registerTools} content={code} disabled={!!recovery || needsReview}
+        validateContent={content => assertCodeNoteFits({ ...noteRef.current, content })}
+        onChange={content => change({ ...noteRef.current, content })} onSave={() => queue.retry()} />
+    </Suspense>}
     {original && <pre className="note-original" data-testid="legacy-original">{JSON.stringify(legacy, null, 2)}</pre>}
     {converted && <div className="note-notice">
       <p>기존 문서입니다. 열기만 해서는 변경되지 않습니다. 전환 후에도 모든 블록은 원본 JSON으로 보관됩니다.</p>
@@ -167,10 +186,11 @@ function Editor({ owner, initial, draft, draftError, onSaved, reload, registerRe
       {mode === 'preview' && <Suspense fallback={<p>미리보기 준비 중…</p>}><Preview source={converted.content.markdown} /></Suspense>}
     </div>}
     {markdown && <div className={`note-editors note-editors-${mode}`}>
-      {mode === 'edit' && <Suspense fallback={<p role="status">편집기 준비 중…</p>}><LiveEditor value={markdown.markdown} disabled={!!recovery || needsReview} toolsOpen={toolsOpen} validateImage={validateImage}
+      {mode === 'edit' && <Suspense fallback={<p role="status">편집기 준비 중…</p>}><LiveEditor registerTools={registerTools} value={markdown.markdown} disabled={!!recovery || needsReview} toolsOpen={toolsOpen} validateImage={validateImage}
         onChange={value => change({ ...noteRef.current, content: { ...markdown, markdown: value } })} /></Suspense>}
-      {(mode === 'source' || mode === 'split') && <MarkdownSource value={markdown.markdown} disabled={!!recovery || needsReview} validateImage={validateImage} onChange={value => change({ ...noteRef.current, content: { ...markdown, markdown: value } })} />}
+      {(mode === 'source' || mode === 'split') && <MarkdownSource registerTools={registerTools} value={markdown.markdown} disabled={!!recovery || needsReview} validateImage={validateImage} onChange={value => change({ ...noteRef.current, content: { ...markdown, markdown: value } })} />}
       {(mode === 'preview' || mode === 'split') && <Suspense fallback={<p role="status">미리보기 준비 중…</p>}><Preview source={markdown.markdown} /></Suspense>}
     </div>}
+    </NoteInteraction>
   </div>;
 }

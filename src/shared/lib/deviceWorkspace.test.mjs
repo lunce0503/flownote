@@ -51,3 +51,14 @@ test('canvas snapshots apply deltas atomically and duplicate mutations do not du
   assert.equal(handleDeviceCanvas(state, 'canvas:load', { canvasId: canvas.id }).lines.length, 0);
   assert.throws(() => handleDeviceCanvas(state, 'canvas:unknown', {}), /기기 전용/);
 });
+
+
+test('device code files retain source text, encoding and format through saves and summaries', () => {
+  const state = createDeviceWorkspace();
+  const source = {format:'code',version:1,text:'fn main() {}\r\n',language:'rust',encoding:'utf-8-bom'};
+  const note = handleDeviceRequest(state, 'POST', '/api/notes', {id:'device-code',title:'main.rs',content:source,revision:1});
+  assert.deepEqual(note.content, source);
+  assert.equal(handleDeviceRequest(state, 'GET', '/api/notes?view=summary').notes[0].content_format, 'code');
+  assert.throws(() => handleDeviceRequest(state,'POST','/api/notes',{id:note.id,title:note.title,content:{format:'markdown',version:1,markdown:'old'},revision:2}), /형식/);
+  assert.deepEqual(handleDeviceRequest(state,'GET','/api/notes/'+note.id).content, source);
+});

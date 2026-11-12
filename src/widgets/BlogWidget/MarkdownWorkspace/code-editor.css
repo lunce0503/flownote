@@ -1,0 +1,80 @@
+.note-document-code {
+  display: flex;
+  flex-direction: column;
+  min-height: 380px;
+  height: 100%;
+  max-width: none;
+}
+.note-code-editor {
+  --code-keyword: #813d99;
+  --code-string: #287044;
+  --code-number: #9c4d19;
+  --code-type: #245f9b;
+  --code-function: #75511f;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 260px;
+  min-width: 0;
+  color: var(--workspace-ink);
+  background: var(--workspace-paper);
+}
+.dark .note-code-editor {
+  --code-keyword: #d5a5ed;
+  --code-string: #a4d7a7;
+  --code-number: #f0b584;
+  --code-type: #91c5eb;
+  --code-function: #e6cc94;
+}
+.note-code-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 12px;
+  background: var(--workspace-sidebar);
+  border-bottom: 1px solid var(--workspace-border);
+}
+.note-code-toolbar button,
+.note-code-toolbar select {
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 160px;
+}
+.note-code-toolbar select {
+  border: 1px solid var(--workspace-border);
+  padding: 5px;
+  background: var(--workspace-paper);
+  color: inherit;
+}
+.note-code-surface {
+  flex: 1;
+  min-height: 180px;
+  min-width: 0;
+  overflow: hidden;
+}
+.note-code-surface .cm-editor { height: 100%; min-height: 180px; }
+.note-code-surface .cm-scroller { overflow: auto; font: 14px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.note-code-surface .cm-content { min-height: 180px; padding: 12px 0; caret-color: var(--workspace-ink); }
+.note-code-surface .cm-gutters { background: var(--workspace-sidebar); color: var(--workspace-muted); border-color: var(--workspace-border); }
+.note-code-surface .cm-activeLine,
+.note-code-surface .cm-activeLineGutter { background: var(--workspace-subtle); }
+.note-code-surface .cm-cursor { border-color: var(--workspace-ink); }
+.note-code-surface .cm-selectionBackground,
+.note-code-surface .cm-editor.cm-focused .cm-selectionBackground { background: var(--workspace-selected); }
+.note-code-surface .cm-panels,
+.note-code-surface .cm-tooltip { background: var(--workspace-paper); color: var(--workspace-ink); border-color: var(--workspace-border); }
+.note-code-surface .cm-search { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; padding: 8px; }
+.note-code-surface .cm-search input { min-width: 90px; max-width: 140px; min-height: 36px; color: inherit; background: var(--workspace-paper); border: 1px solid var(--workspace-border); }
+.note-code-surface .cm-search input[type=checkbox] { min-width: 16px; min-height: 16px; }
+.note-code-surface .cm-search label { display: inline-flex; align-items: center; gap: 4px; }
+.note-code-status { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 5px 14px; font-size: 12px; color: var(--workspace-muted); border-top: 1px solid var(--workspace-border); }
+.note-code-help { padding: 3px 14px 7px; color: var(--workspace-muted); font-size: 11px; }
+.note-code-error { padding: 8px 14px; color: var(--workspace-ink); }
+@media (max-width: 700px) {
+  .note-code-toolbar { padding: 5px 7px; max-height: 22dvh; overflow: auto; }
+  .note-code-toolbar button,
+  .note-code-toolbar select { min-width: 44px; min-height: 44px; }
+  .note-code-surface .cm-scroller { font-size: 15px; }
+  .note-code-help { display: none; }
+}

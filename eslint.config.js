@@ -5,8 +5,6 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
-<<<<<<< HEAD
-=======
 // FSD 레이어 경계 규칙.
 // - 상향 import 금지: 하위 레이어는 상위 레이어를 모른다.
 // - 동일 레이어 교차 슬라이스 alias 금지: 슬라이스 내부는 상대경로, 교차는 금지.
@@ -50,7 +48,6 @@ const fsdLayerRules = (layer, upperLayers, sameLayerBan) => ({
   },
 })
 
->>>>>>> 678fcbf (separate repository to flownote-service)
 export default defineConfig([
   globalIgnores(['dist']),
   {
@@ -66,13 +63,10 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
-<<<<<<< HEAD
-=======
   fsdLayerRules('shared', ['entities', 'features', 'widgets', 'pages', 'app'], true),
   fsdLayerRules('entities', ['features', 'widgets', 'pages', 'app'], true),
   fsdLayerRules('features', ['widgets', 'pages', 'app'], true),
   fsdLayerRules('widgets', ['pages', 'app'], true),
   fsdLayerRules('pages', ['app'], true),
   fsdLayerRules('app', [], false),
->>>>>>> 678fcbf (separate repository to flownote-service)
 ])

@@ -1,7 +1,9 @@
 import { isMarkdown, type MarkdownContent } from './markdown';
-export type NoteContent = unknown[] | MarkdownContent;
+import { isCodeContent, type CodeContent } from './codeFiles';
+export type NoteContent = unknown[] | MarkdownContent | CodeContent;
 
 export interface BlockDataProps {
+  content_format?: 'markdown' | 'code' | 'blocknote';
   id: string;
   title: string;
   content: NoteContent;
@@ -17,6 +19,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> => (
 
 export const getFirstNoteText = (content: NoteContent): string | null => {
   if (isMarkdown(content)) return content.markdown.trim() || null;
+  if (isCodeContent(content)) return content.text.trim() || null;
   const visit = (value: unknown): string | null => {
     if (typeof value === "string") return value.trim() || null;
     if (Array.isArray(value)) {

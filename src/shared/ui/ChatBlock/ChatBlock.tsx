@@ -1,13 +1,5 @@
 import type { ChatMessage } from "./type";
 import ReactMarkdownRender from "../ReactMarkdownRender";
-<<<<<<< HEAD
-
-const ChatBlock = ({ sender, message }: ChatMessage) => {
-    const isUser = sender === "user";
-
-    return (
-        <div className={`chat-block flex w-full mb-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
-=======
 import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -63,20 +55,16 @@ const ChatBlock = ({ id, sender, message, nickname, canDelete = false, onDelete 
                     )}
                 </div>
             )}
->>>>>>> 678fcbf (separate repository to flownote-service)
             <div className={`chat-block-design max-w-[85%] p-3 rounded-2xl shadow-sm ${
                 isUser 
                 ? 'bg-blue-600 text-white rounded-tr-none' 
                 : 'bg-white text-gray-800 border border-gray-200 rounded-tl-none'
             }`}>
-<<<<<<< HEAD
-=======
                 {!isUser && nickname && (
                     <div className="mb-1 text-xs font-semibold text-stone-500">
                         {nickname}
                     </div>
                 )}
->>>>>>> 678fcbf (separate repository to flownote-service)
                 <div className="markdown-render text-sm leading-relaxed markdown-body">
                     <ReactMarkdownRender message={message}/>
                 </div>
@@ -85,8 +73,4 @@ const ChatBlock = ({ id, sender, message, nickname, canDelete = false, onDelete 
     );
 };
 
-<<<<<<< HEAD
 export default ChatBlock;
-=======
-export default ChatBlock;
->>>>>>> 678fcbf (separate repository to flownote-service)

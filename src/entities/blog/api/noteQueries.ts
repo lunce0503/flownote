@@ -2,6 +2,7 @@ import axios from 'axios';
 import { API_CORE_BASE_URL, authHeaders } from '@/shared/api';
 import type { BlockDataProps, NoteSummary } from '../model/types';
 import { isMarkdown } from '../model/markdown';
+import { isCodeContent } from '../model/codeFiles';
 import { collectNoteSummaries, type NoteSummaryPage } from '../model/noteQueries';
 
 export const getNoteSummaries = (signal?: AbortSignal, onPage?: (notes: NoteSummary[]) => void) => collectNoteSummaries(async cursor => {
@@ -14,7 +15,7 @@ export const getNote = async (id: string, signal?: AbortSignal): Promise<BlockDa
   const response = await axios.get<BlockDataProps>(`${API_CORE_BASE_URL}/api/notes/${encodeURIComponent(id)}`, {
     headers: authHeaders(), signal,
   });
-  if (response.data.id !== id || (!Array.isArray(response.data.content) && !isMarkdown(response.data.content))) {
+  if (response.data.id !== id || (!Array.isArray(response.data.content) && !isMarkdown(response.data.content) && !isCodeContent(response.data.content))) {
     throw new Error('지원하지 않는 노트 본문입니다. 원본을 변경하지 않았습니다.');
   }
   return response.data;

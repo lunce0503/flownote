@@ -3,11 +3,6 @@ import remarkGfm from 'remark-gfm';
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 import 'katex/dist/katex.min.css';
-<<<<<<< HEAD
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-
-=======
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
 import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
@@ -36,7 +31,6 @@ SyntaxHighlighter.registerLanguage('tsx', tsx);
 SyntaxHighlighter.registerLanguage('typescript', typescript);
 SyntaxHighlighter.registerLanguage('ts', typescript);
 
->>>>>>> 678fcbf (separate repository to flownote-service)
 
 interface ReactMarkdownRenderProps {
     message : string;
@@ -49,20 +43,11 @@ const ReactMarkdownRender = ({message}:ReactMarkdownRenderProps) => {
             remarkPlugins={[remarkGfm,remarkMath]}
             rehypePlugins={[rehypeKatex]}
             components={{
-<<<<<<< HEAD
-                code(props: any) {
-                    const { children, className, node, ...rest } = props;
-=======
                 code({ children, className }) {
->>>>>>> 678fcbf (separate repository to flownote-service)
                     const match = /language-(\w+)/.exec(className || '');
                     return match ? (
                         <div className="my-2 rounded-md overflow-hidden">
                             <SyntaxHighlighter
-<<<<<<< HEAD
-                                {...rest}
-=======
->>>>>>> 678fcbf (separate repository to flownote-service)
                                 style={oneDark}
                                 language={match[1]}
                                 PreTag="div"
@@ -71,11 +56,7 @@ const ReactMarkdownRender = ({message}:ReactMarkdownRenderProps) => {
                             </SyntaxHighlighter>
                         </div>
                     ) : (
-<<<<<<< HEAD
-                        <code className="bg-gray-200 text-red-500 px-1 rounded" {...rest}>
-=======
                         <code className="bg-gray-200 text-red-500 px-1 rounded">
->>>>>>> 678fcbf (separate repository to flownote-service)
                             {children}
                         </code>
                     );
@@ -83,8 +64,6 @@ const ReactMarkdownRender = ({message}:ReactMarkdownRenderProps) => {
                 ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
                 ol: ({ children }) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
                 p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
-<<<<<<< HEAD
-=======
                 a: ({ children, href }) => {
                     const label = String(children);
                     if (href && label.startsWith("동영상:")) {
@@ -107,7 +86,6 @@ const ReactMarkdownRender = ({message}:ReactMarkdownRenderProps) => {
                 img: ({ alt, src }) => (
                     <img className="my-2 max-h-64 rounded-lg border object-contain" alt={alt ?? "uploaded"} src={src ?? ""} />
                 ),
->>>>>>> 678fcbf (separate repository to flownote-service)
                 u: ({ children }) => <span className="underline">{children}</span>,
             }}
         >

@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-import Canvas from "../../../widgets/CanvasWidget/InfiniteCanvas";
-
-export default function CanvasRoute() {
-    return <Canvas />
-}
-=======
 import { useParams } from "react-router-dom";
 import CanvasWidget from "@/widgets/CanvasWidget";
 
@@ -13,4 +6,3 @@ export default function CanvasRoute() {
     const { canvasId } = useParams<{ canvasId: string }>();
     return <CanvasWidget key={canvasId} />;
 }
->>>>>>> 678fcbf (separate repository to flownote-service)

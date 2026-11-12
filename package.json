@@ -4,35 +4,47 @@
   "type": "module",
   "private": true,
   "scripts": {
-<<<<<<< HEAD
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-=======
     "build": "yarn typecheck && vite build",
     "lint": "eslint src",
     "typecheck": "tsc -b --pretty false",
     "verify": "yarn lint && yarn build",
     "e2e": "playwright test"
->>>>>>> 678fcbf (separate repository to flownote-service)
   },
   "dependencies": {
     "@blocknote/core": "^0.47.1",
     "@blocknote/mantine": "^0.47.1",
     "@blocknote/react": "^0.47.1",
+    "@codemirror/autocomplete": "6.20.4",
+    "@codemirror/commands": "6.11.1",
+    "@codemirror/lang-css": "6.3.1",
+    "@codemirror/lang-html": "6.4.12",
+    "@codemirror/lang-java": "6.0.2",
+    "@codemirror/lang-javascript": "6.2.5",
+    "@codemirror/lang-json": "6.0.2",
+    "@codemirror/lang-markdown": "6.5.2",
+    "@codemirror/lang-php": "6.0.2",
+    "@codemirror/lang-python": "6.2.1",
+    "@codemirror/lang-rust": "6.0.2",
+    "@codemirror/lang-sql": "6.10.0",
+    "@codemirror/lang-xml": "6.1.0",
+    "@codemirror/language": "6.13.1",
+    "@codemirror/legacy-modes": "6.5.5",
+    "@codemirror/lint": "6.9.7",
+    "@codemirror/search": "6.7.2",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.15",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/helpers": "^0.3.2",
     "@dnd-kit/react": "^0.3.2",
     "@dnd-kit/sortable": "^10.0.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@lezer/highlight": "1.2.5",
     "@mantine/core": "^8.3.15",
     "@mantine/ds": "^6.0.22",
     "@mantine/hooks": "^8.3.15",
     "@react-pdf-viewer/core": "^3.12.0",
     "@react-pdf-viewer/default-layout": "^3.12.0",
-<<<<<<< HEAD
-=======
     "@tiptap/core": "3.20.0",
     "@tiptap/extension-image": "3.20.0",
     "@tiptap/extension-list": "3.20.0",
@@ -42,22 +54,17 @@
     "@tiptap/pm": "3.20.0",
     "@tiptap/react": "3.20.0",
     "@tiptap/starter-kit": "3.20.0",
->>>>>>> 678fcbf (separate repository to flownote-service)
     "@types/react-dom": "^19.2.3",
     "@types/react-modal": "^3.16.3",
     "@types/react-syntax-highlighter": "^15.5.13",
     "axios": "^1.13.5",
+    "codemirror": "6.0.2",
     "katex": "^0.16.27",
-<<<<<<< HEAD
-    "lucide-react": "^1.7.0",
-    "pdfjs-dist": "3.4.120",
-=======
     "konva": "^10.3.0",
     "lucide-react": "^1.7.0",
     "marked": "17.0.6",
     "pdfjs-dist": "3.4.120",
     "rbush": "^4.0.1",
->>>>>>> 678fcbf (separate repository to flownote-service)
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-katex": "^3.1.0",
@@ -67,35 +74,21 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
-<<<<<<< HEAD
-=======
     "socket.io-client": "^4.8.3",
->>>>>>> 678fcbf (separate repository to flownote-service)
     "tailwind-scrollbar": "^4.0.2",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-<<<<<<< HEAD
-    "@tailwindcss/vite": "^4.1.18",
-    "@types/node": "^25.0.3",
-=======
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^25.0.3",
     "@types/rbush": "^4.0.0",
->>>>>>> 678fcbf (separate repository to flownote-service)
     "@types/react": "^19.2.7",
     "@types/uuid": "^11.0.0",
     "@vitejs/plugin-react": "^5.1.2",
     "@vitejs/plugin-react-swc": "^4.2.2",
     "autoprefixer": "^10.4.23",
-<<<<<<< HEAD
-    "postcss": "^8.5.6",
-    "react-router-dom": "^7.11.0",
-    "tailwindcss": "^4.1.18",
-    "typescript": "^5.9.3",
-=======
     "eslint": "^10.6.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
@@ -106,15 +99,11 @@
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.63.0",
->>>>>>> 678fcbf (separate repository to flownote-service)
     "vite": "^7.3.0"
   },
   "main": "index.js",
   "repository": "https://github.com/lunce0503/flownote.git",
   "author": "lunce0503 <lunce0503@gmail.com>",
-<<<<<<< HEAD
-  "license": "MIT"
-=======
   "license": "MIT",
   "resolutions": {
     "@tiptap/extension-bullet-list": "3.20.0",
@@ -150,5 +139,4 @@
     "@tiptap/extension-heading": "3.20.0",
     "@tiptap/extension-ordered-list": "3.20.0"
   }
->>>>>>> 678fcbf (separate repository to flownote-service)
 }

@@ -22,3 +22,6 @@ export { safeMarkdownUrl } from './model/markdown';
 export { safeMarkdownImageUrl } from './model/markdown';
 export { readNoteImage, assertImageFits, assertNoteImageSaveFits, imageMarkdown, NOTE_IMAGE_ACCEPT } from './model/noteImages';
 export type { NoteImage } from './model/noteImages';
+
+export { CODE_LANGUAGES, CODE_FILE_ACCEPT, isCodeContent, codeLanguageForFile, codeFileExtension, noteFileName, newCodeContent, readCodeFile, codeFileBytes, assertCodeNoteFits } from './model/codeFiles';
+export type { CodeContent, CodeLanguage, CodeEncoding } from './model/codeFiles';

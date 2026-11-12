@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronRight, FilePlus2, FileText, Folder, FolderPlus, PanelsTopLeft, MoreVertical, PanelLeft, RefreshCw } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileCode2, Upload, FilePlus2, FileText, Folder, FolderPlus, PanelsTopLeft, MoreVertical, PanelLeft, RefreshCw } from 'lucide-react';
 import { addNoteToFolder, deleteNote, deleteNoteFolder, getNoteFolders, getNoteSummaries,
-  noteDrafts, postNoteData, removeNoteFromFolder, updateNoteFolder, updateNoteTitle } from '@/entities/blog';
+  noteDrafts, postNoteData, removeNoteFromFolder, updateNoteFolder, updateNoteTitle, CODE_FILE_ACCEPT, isCodeContent, isMarkdown, noteFileName, newCodeContent, readCodeFile, assertCodeNoteFits } from '@/entities/blog';
 import type { BlockDataProps, NoteFolder, NoteSummary } from '@/entities/blog';
 import { getAuthUser } from '@/shared/api';
 import { newWorkspaceId } from '@/shared/lib/deviceMode';
@@ -12,14 +12,19 @@ import { pauseNoteSave, waitForNoteSave } from '@/features/blog';
 import {SharedFolderTree,getSharedFolders,createSharedFolder,updateSharedFolder,deleteSharedFolder,moveSharedMember,type SharedFolder} from '@/features/workspace';
 import {getCanvasDocuments,createCanvasDocument,type CanvasDocumentSummary} from '@/entities/canvas';
 import NoteEditor from './NoteEditor';
+import { CodeFileDialog } from '@/features/blog';
 import '@/shared/styles/workspace.css';
 import './workspace.css';
+import './code-editor.css';
 
 export default function MarkdownWorkspace() {
   const owner = getAuthUser()?.id ?? '';
   return <Workspace key={owner} owner={owner} />;
 }
 function Workspace({ owner }: { owner: string }) {
+  const [codeDialog, setCodeDialog] = useState(false);
+  const [fileError, setFileError] = useState('');
+  const fileInput = useRef<HTMLInputElement>(null);
   const { noteId } = useParams<{ noteId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -112,7 +117,7 @@ function Workspace({ owner }: { owner: string }) {
   const tree = workspaceTree(notes.filter(n=>!sharedNotes.has(n.id)), folders);
   const handleSaved = useCallback((saved: BlockDataProps) => {
     if (getAuthUser()?.id !== owner) return;
-    const summary: NoteSummary = { id: saved.id, title: saved.title, created_at: saved.created_at, updated_at: saved.updated_at, revision: saved.revision };
+    const summary: NoteSummary = { content_format: isCodeContent(saved.content) ? 'code' : isMarkdown(saved.content) ? 'markdown' : 'blocknote', id: saved.id, title: saved.title, created_at: saved.created_at, updated_at: saved.updated_at, revision: saved.revision };
     setNotes(current => current.some(note => note.id === saved.id) ? current.map(note => note.id === saved.id ? summary : note) : [summary, ...current]);
   }, [owner]);
   const run = async (action: () => Promise<void>) => {
@@ -125,9 +130,11 @@ function Workspace({ owner }: { owner: string }) {
   };
   const openNote = (id: string) => { navigate(`/blog/${id}`); if (window.matchMedia('(max-width: 700px)').matches) setDrawer(false); };
   const toggleFolder = (id: string) => setCollapsed(ids => ids.includes(id) ? ids.filter(v => v !== id) : [...ids, id]);
-  const newNote = () => void run(async () => {
-    const saved = await postNoteData({ id: newWorkspaceId(), title: '제목 없음',
-      content: { format: 'markdown', version: 1, markdown: '' }, created_at: new Date().toISOString(), revision: 1, client_id: getSyncClientId() });
+  const createDocument = async (document: Pick<BlockDataProps, 'title' | 'content'>) => {
+    if (getAuthUser()?.id !== owner) return;
+    const request = { ...document, id: newWorkspaceId(), created_at: new Date().toISOString(), revision: 1, client_id: getSyncClientId() };
+    assertCodeNoteFits(request);
+    const saved = await postNoteData(request);
     if (getAuthUser()?.id !== owner) return;
     let warning = '';
     if(activeShared){try{await moveSharedMember(activeShared,'note',saved.id);}catch{warning='노트는 만들었지만 공통 폴더에 넣지 못했습니다. 미분류에서 다시 이동하세요.';}}
@@ -139,6 +146,14 @@ function Workspace({ owner }: { owner: string }) {
     if (getAuthUser()?.id !== owner) return;
     navigate(`/blog/${saved.id}`, { state: { noteCreationWarning: warning, createdNoteId: saved.id } });
     if (window.matchMedia('(max-width: 700px)').matches) setDrawer(false);
+  };
+  const newNote = () => void run(() => createDocument({ title: '제목 없음', content: { format: 'markdown', version: 1, markdown: '' } }));
+  const importFile = (file: File) => void run(async () => {
+    setFileError('');
+    let document: Awaited<ReturnType<typeof readCodeFile>>;
+    try { document = await readCodeFile(file); }
+    catch (error) { setFileError(error instanceof Error ? error.message : '파일을 읽지 못했습니다.'); return; }
+    await createDocument(document);
   });
   const newFolder = () => {createFolderId.current=null;setFolderForm({kind:'shared',name:'',category:activeShared?.category??activeFolder?.category??''});};
   const saveFolder=()=>void run(async()=>{
@@ -169,7 +184,7 @@ function Workspace({ owner }: { owner: string }) {
   const noteRow = (note: NoteSummary, parent?: NoteFolder) => <div className="note-tree-row" key={note.id}>
     <button className="note-tree-label" role="treeitem" aria-level={parent ? 3 : 2} data-parent={parent?.id} aria-selected={noteId === note.id}
       title={note.title} onClick={() => { setFolderId(parent?.id ?? ''); openNote(note.id); }}>
-      <FileText size={16} /><span>{(note.title || '제목 없음').replace(/\.md$/i, '')}.md</span>
+      <FileText size={16} /><span>{noteFileName(note)}</span>
     </button>
     <details className="note-file-menu"><summary aria-label={`${note.title} 파일 동작`}><MoreVertical size={17} /></summary><div>
       <button disabled={busy} onClick={() => renameNote(note)}>이름 변경</button>
@@ -199,6 +214,12 @@ function Workspace({ owner }: { owner: string }) {
         노트 / {selectedShared?`${selectedShared.category||'카테고리 없음'} / ${selectedShared.name} / `:''}{selectedFolder ? `${selectedFolder.category || '카테고리 없음'} / ${selectedFolder.name} / ` : ''}{selected?.title ?? '작업 공간'}
       </div>
       <button onClick={newNote} disabled={busy} aria-label="새 노트" title="새 노트"><FilePlus2 size={19} /></button>
+      <button onClick={() => setCodeDialog(true)} disabled={busy} aria-label="새 코드 파일" title="새 코드 파일"><FileCode2 size={19} /></button>
+      <button onClick={() => fileInput.current?.click()} disabled={busy} aria-label="코드 파일 가져오기" title="코드 파일 가져오기"><Upload size={19} /></button>
+      <input ref={fileInput} type="file" hidden aria-label="코드 파일 선택" accept={CODE_FILE_ACCEPT} disabled={busy} onChange={event => {
+        const file = event.currentTarget.files?.[0]; event.currentTarget.value = '';
+        if (file) importFile(file);
+      }} />
       {activeShared&&<button onClick={newCanvas} disabled={busy} aria-label="새 캔버스" title="새 캔버스"><PanelsTopLeft size={19}/></button>}
       {noteId&&<select aria-label="현재 노트 이동" disabled={busy} value={selectedShared?'shared:'+selectedShared.id:selectedFolder?.id??''} onChange={e=>{const target=e.target.value;void run(()=>moveNote(noteId,target,selectedFolder));}}><option value="">미분류</option>{sharedFolders.map(f=><option key={'shared:'+f.id} value={'shared:'+f.id}>{f.category||'카테고리 없음'} / {f.name}</option>)}{folders.map(f=><option key={f.id} value={f.id}>{f.category||'카테고리 없음'} / {f.name} (기존)</option>)}</select>}
       <button onClick={newFolder} disabled={busy} aria-label="새 폴더" title="새 폴더"><FolderPlus size={18} /></button>
@@ -250,11 +271,16 @@ function Workspace({ owner }: { owner: string }) {
         {!loading && notes.length === 0 && !error && <p>아직 노트가 없습니다. 새 노트로 시작하세요.</p>}
       </aside>
       <main className="note-content" aria-label="문서">
+        {fileError && <p role="alert" className="note-notice">{fileError}</p>}
         {creationWarning && <p role="alert" className="note-notice">{creationWarning}<button onClick={() => navigate(location.pathname, { replace: true, state: null })}>닫기</button></p>}
         {error && <p role="alert" className="note-notice">{error}</p>}
         {noteId ? <NoteEditor key={`${owner}:${noteId}`} owner={owner} id={noteId} registerRename={registerRename} onSaved={handleSaved} /> :
-          <div className="note-workspace-empty"><FileText size={32} /><h1>노트 작업 공간</h1><p>폴더에서 노트를 선택하거나 Markdown 문서를 만드세요.</p><button onClick={newNote} disabled={busy}>새 노트</button></div>}
+          <div className="note-workspace-empty"><FileText size={32} /><h1>노트 작업 공간</h1><p>폴더에서 문서를 선택하거나 노트·코드 파일을 만드세요.</p><button onClick={newNote} disabled={busy}>새 노트</button></div>}
       </main>
     </div>
+    {codeDialog && <CodeFileDialog close={() => setCodeDialog(false)} create={(title, language) => {
+      setCodeDialog(false);
+      void run(() => createDocument({ title, content: newCodeContent(language) }));
+    }} />}
   </section>;
 }
