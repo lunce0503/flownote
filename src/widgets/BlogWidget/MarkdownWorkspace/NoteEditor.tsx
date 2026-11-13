@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { convertLegacy, assertImageFits, assertNoteImageSaveFits, isMarkdown, noteDrafts, recoveryState, getNote, postNoteData, isCodeContent, noteFileName, assertCodeNoteFits } from '@/entities/blog';
 import type { BlockDataProps, NoteDraft } from '@/entities/blog';
 import { useDocumentTitle } from '@/shared/lib/useDocumentTitle';
@@ -6,7 +6,7 @@ import { getAuthUser } from '@/shared/api';
 import { isDeviceOnly } from '@/shared/lib/deviceMode';
 import { getSyncClientId, subscribeSyncEvents } from '@/shared/lib/sync';
 import { createNoteSaveQueue, waitForNoteSave } from '@/features/blog';
-import { Code, Columns2, Download, Eye, MoreVertical, Pencil, RefreshCw, SlidersHorizontal } from 'lucide-react';
+import { Code, Columns2, Download, Eye, MoreVertical, Pencil, RefreshCw, SlidersHorizontal, Menu, Check, LoaderCircle, CircleAlert } from 'lucide-react';
 import MarkdownSource from './MarkdownSource';
 import NoteInteraction from './NoteInteraction';
 import type { NoteTextTools, RegisterNoteTools } from './noteMobileTools';
@@ -18,7 +18,7 @@ const LiveEditor = lazy(() => import('./LiveMarkdownEditor'));
 const CodeEditor = lazy(() => import('./CodeEditor'));
 
 type RegisterRename = (rename: ((title: string) => void) | null) => void;
-export default function NoteEditor({ owner, id, onSaved, registerRename }: { owner: string; id: string; onSaved: (saved: BlockDataProps) => void; registerRename: RegisterRename }) {
+export default function NoteEditor({ owner, id, onSaved, registerRename, onToggleExplorer }: { onToggleExplorer: () => void; owner: string; id: string; onSaved: (saved: BlockDataProps) => void; registerRename: RegisterRename }) {
   const [loaded, setLoaded] = useState<{ note: BlockDataProps; draft: NoteDraft | null; draftError: boolean } | null>(null);
   const [error, setError] = useState('');
   const [failedDraft, setFailedDraft] = useState<NoteDraft | null>(null);
@@ -54,12 +54,12 @@ export default function NoteEditor({ owner, id, onSaved, registerRename }: { own
     </>}
   </div>;
   if (!loaded) return <p role="status">선택한 노트를 불러오는 중…</p>;
-  return <Editor key={`${owner}:${id}:${reload}`} owner={owner} initial={loaded.note} draft={loaded.draft} draftError={loaded.draftError} onSaved={onSaved} registerRename={registerRename}
+  return <Editor key={`${owner}:${id}:${reload}`} owner={owner} initial={loaded.note} draft={loaded.draft} draftError={loaded.draftError} onSaved={onSaved} registerRename={registerRename} onToggleExplorer={onToggleExplorer}
     reload={() => { setLoaded(null); setReload(v => v + 1); }} />;
 }
 
-function Editor({ owner, initial, draft, draftError, onSaved, reload, registerRename }: {
-  owner: string; initial: BlockDataProps; draft: NoteDraft | null; draftError: boolean; onSaved: (saved: BlockDataProps) => void; reload: () => void; registerRename: RegisterRename;
+function Editor({ owner, initial, draft, draftError, onSaved, reload, registerRename, onToggleExplorer }: {
+  onToggleExplorer: () => void; owner: string; initial: BlockDataProps; draft: NoteDraft | null; draftError: boolean; onSaved: (saved: BlockDataProps) => void; reload: () => void; registerRename: RegisterRename;
 }) {
   const state = draft ? recoveryState(draft, initial) : 'matched';
   const [note, setNote] = useState(initial);
@@ -88,12 +88,38 @@ function Editor({ owner, initial, draft, draftError, onSaved, reload, registerRe
       event.preventDefault(); event.returnValue = '';
     };
     window.addEventListener('beforeunload', beforeUnload);
+    const abort = new AbortController();
+    let checking = false, checkAgain = false, reviewed = false, retryAfterCheck = false;
+    const checkRemote = async () => {
+      if (checking) { checkAgain = true; return; }
+      checking = true;
+      try {
+        do {
+          checkAgain = false;
+          await queue.settled;
+          const server = await getNote(initial.id, abort.signal);
+          await queue.settled;
+          if (abort.signal.aborted || getAuthUser()?.id !== owner) return;
+          if ((server.revision ?? 0) > queue.revision) {
+            reviewed = true; queue.pause(); setRemoteChanged(true); setStatus('원격 변경 확인 필요');
+          } else if (retryAfterCheck && queue.hasPending && !queue.conflicted) queue.retry();
+          retryAfterCheck = false;
+        } while (checkAgain && !reviewed);
+      } catch (error) {
+        if (!abort.signal.aborted && getAuthUser()?.id === owner && (error as { response?: { status?: number } }).response?.status === 404) {
+          reviewed = true; queue.pause(); setRemoteChanged(true); setStatus('원격 변경 확인 필요');
+        }
+      } finally { checking = false; }
+    };
     const unsubscribe = subscribeSyncEvents(event => {
-      if (event.resource !== 'notes' && event.resource !== 'all') return;
-      if (event.clientId === getSyncClientId() || event.action.startsWith('folder-')) return;
-      if (!event.noteId || event.noteId === initial.id) { queue.pause(); setRemoteChanged(true); }
+      if (reviewed || event.clientId === getSyncClientId()) return;
+      const reconnect = event.resource === 'all' && event.action === 'reconnected';
+      const changed = event.resource === 'notes' && ['note-saved', 'note-title-updated', 'note-deleted'].includes(event.action)
+        && (!event.noteId || event.noteId === initial.id);
+      if (reconnect) retryAfterCheck = true;
+      if (reconnect || changed) void checkRemote();
     });
-    return () => { window.removeEventListener('beforeunload', beforeUnload); unsubscribe(); queue.pause(); };
+    return () => { abort.abort(); window.removeEventListener('beforeunload', beforeUnload); unsubscribe(); queue.pause(); };
   }, [owner, initial.id, queue, draft, state]);
   const change = (next: BlockDataProps) => {
     try { assertCodeNoteFits(next); } catch (error) { setStatus(error instanceof Error ? error.message : '코드 파일의 크기를 확인해주세요.'); return; }
@@ -111,10 +137,24 @@ function Editor({ owner, initial, draft, draftError, onSaved, reload, registerRe
   }, [registerRename, recovery, needsReview, queue]);
   const code = isCodeContent(note.content) ? note.content : null;
   const markdown = isMarkdown(note.content) ? note.content : null;
+  const root = useRef<HTMLDivElement>(null);
+  const codeNote = code !== null;
+  useLayoutEffect(() => {
+    if (!codeNote) return;
+    const element = root.current!;
+    const resize = () => {
+      if (!window.matchMedia('(max-width: 700px)').matches) { element.style.removeProperty('height'); return; }
+      const visual = window.visualViewport;
+      const top = Math.max(0, element.getBoundingClientRect().top - (visual?.offsetTop ?? 0));
+      element.style.height = `${Math.max(120, (visual?.height ?? innerHeight) - top)}px`;
+    };
+    resize(); window.addEventListener('resize', resize); window.visualViewport?.addEventListener('resize', resize);
+    return () => { window.removeEventListener('resize', resize); window.visualViewport?.removeEventListener('resize', resize); };
+  }, [codeNote]);
   const legacy = Array.isArray(note.content) ? note.content : markdown?.legacy_original;
   const converted = Array.isArray(note.content) ? convertLegacy(note.content) : null;
   const validateImage=(value:string,src:string)=>assertImageFits(value,src,noteRef.current);
-  return <div className={`note-document${code ? ' note-document-code' : ''}`} data-note-id={initial.id}>
+  return <div ref={root} className={`note-document${code ? ' note-document-code' : ''}`} data-note-id={initial.id}>
     {(recovery || needsReview) && <div className="note-notice" role="alert">
       {recovery ? '기기에 저장된 입력이 있습니다. 서버본과 초안을 확인한 뒤 선택하세요.' : '다른 창의 변경을 확인해야 합니다. 자동 저장을 멈췄습니다.'}
       {recovery && <>
@@ -133,10 +173,11 @@ function Editor({ owner, initial, draft, draftError, onSaved, reload, registerRe
       }}>서버본 확인</button>}
     </div>}
     <div className="note-document-heading">
+      {code && <button className="note-code-explorer-toggle" aria-label="파일 탐색기 열기" onClick={onToggleExplorer}><Menu size={20} /></button>}
       <input aria-label="노트 제목" value={note.title} disabled={!!recovery || needsReview} autoFocus={initial.title === '제목 없음'} onFocus={event => { if (event.target.value === '제목 없음') event.target.select(); }}
         onChange={e => change({ ...noteRef.current, title: e.target.value })}
         onCompositionEnd={e => change({ ...noteRef.current, title: e.currentTarget.value })} />
-      <span role="status" data-testid="note-save-status">{status}</span>
+      <span role="status" data-testid="note-save-status" title={status}><span className="note-save-icon" aria-hidden="true">{/실패|충돌|확인 필요|중지/.test(status) ? <CircleAlert size={16} /> : /중|변경/.test(status) ? <LoaderCircle size={16} /> : <Check size={16} />}</span><span className="note-save-text">{status}</span></span>
     </div>
     <div className="note-document-tools" onKeyDown={event => {
       if (event.key !== 'Escape') return;
@@ -166,7 +207,7 @@ function Editor({ owner, initial, draft, draftError, onSaved, reload, registerRe
       <button aria-label="원문" title="Markdown 원문" aria-pressed={mode === 'source'} onClick={() => setMode('source')}><Code size={17} /><span>원문</span></button>
       <button aria-label="나란히" title="원문과 미리보기 나란히" aria-pressed={mode === 'split'} onClick={() => setMode('split')}><Columns2 size={17} /><span>나란히</span></button>
     </div>}
-    <NoteInteraction disabled={!!recovery || needsReview} editorTools={editorTools}
+    <NoteInteraction code={!!code} disabled={!!recovery || needsReview} editorTools={editorTools}
       onEdit={() => { if (markdown && mode === 'preview') setMode('edit'); }}>
     {code && <Suspense fallback={<p role="status">코드 편집기 준비 중…</p>}>
       <CodeEditor registerTools={registerTools} content={code} disabled={!!recovery || needsReview}

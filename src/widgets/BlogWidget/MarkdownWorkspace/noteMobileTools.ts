@@ -16,6 +16,8 @@ export interface NoteTextTools {
   focus: () => void;
   placeCaret: (point: NotePoint) => void;
   undo: () => void;
+  redo?: () => void;
+  setZoom?: (zoom: number, focus: NotePoint, anchor?: NotePoint) => void;
   scrollElement?: HTMLElement;
 }
 export type RegisterNoteTools = (tools: NoteTextTools | null) => void;

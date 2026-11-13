@@ -20,3 +20,4 @@
 .note-viewport .cm-content,
 .note-viewport .note-live-content,
 .note-viewport textarea[aria-label="Markdown 본문"] { touch-action: none !important; }
+.note-interaction-code .note-viewport { overflow: hidden; }

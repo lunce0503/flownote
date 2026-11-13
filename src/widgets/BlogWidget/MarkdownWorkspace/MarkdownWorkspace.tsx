@@ -274,7 +274,7 @@ function Workspace({ owner }: { owner: string }) {
         {fileError && <p role="alert" className="note-notice">{fileError}</p>}
         {creationWarning && <p role="alert" className="note-notice">{creationWarning}<button onClick={() => navigate(location.pathname, { replace: true, state: null })}>닫기</button></p>}
         {error && <p role="alert" className="note-notice">{error}</p>}
-        {noteId ? <NoteEditor key={`${owner}:${noteId}`} owner={owner} id={noteId} registerRename={registerRename} onSaved={handleSaved} /> :
+        {noteId ? <NoteEditor onToggleExplorer={() => setDrawer(v => !v)} key={`${owner}:${noteId}`} owner={owner} id={noteId} registerRename={registerRename} onSaved={handleSaved} /> :
           <div className="note-workspace-empty"><FileText size={32} /><h1>노트 작업 공간</h1><p>폴더에서 문서를 선택하거나 노트·코드 파일을 만드세요.</p><button onClick={newNote} disabled={busy}>새 노트</button></div>}
       </main>
     </div>

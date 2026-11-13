@@ -13,6 +13,11 @@ const samples: {language: CodeLanguage; extension: string; text: string}[] = [
   {language:'html',extension:'html',text:'<script>window.codeFileExecuted = true</script>\n'},
 ];
 const editor = (page: Page) => page.getByRole('textbox',{name:'코드 편집기',exact:true});
+async function codeTool(page: Page, name: string) {
+  const button = page.getByRole('button', {name, exact:true});
+  if (!await button.isVisible()) await page.getByLabel('코드 편집 도구 더보기', {exact:true}).click();
+  await button.click();
+}
 export async function importCodeNote(page: Page, name: string, bytes: Uint8Array) {
   const previous = page.url();
   await page.getByLabel('코드 파일 선택',{exact:true}).setInputFiles({name,mimeType:'application/octet-stream',buffer:Buffer.from(bytes)});
@@ -80,9 +85,9 @@ export function registerCodeNotes(engine: string) {
       const dialog=page.getByRole('dialog',{name:'새 코드 파일',exact:true});
       await dialog.getByLabel('파일 이름',{exact:true}).fill('new-code.json');await dialog.getByRole('button',{name:'만들기',exact:true}).click();
       await expect(editor(page)).toBeVisible();const id=new URL(page.url()).pathname.split('/').at(-1)!;ids.push(id);
-      await replaceCode(page,'{"a":1,"b":2}');await page.getByRole('button',{name:'JSON 정렬',exact:true}).click();
+      await replaceCode(page,'{"a":1,"b":2}');await codeTool(page,'JSON 정렬');
       await expect.poll(async()=>(await(await request.get(api+'/api/notes/'+id,{headers})).json()).content.text).toContain('\n');
-      await page.getByRole('button',{name:'검색·바꾸기',exact:true}).click();await page.getByLabel('검색',{exact:true}).fill('"a"');await page.getByLabel('바꾸기',{exact:true}).fill('"renamed"');await page.getByRole('button',{name:'모두 바꾸기',exact:true}).click();
+      await codeTool(page,'검색·바꾸기');await page.getByLabel('검색',{exact:true}).fill('"a"');await page.getByLabel('바꾸기',{exact:true}).fill('"renamed"');await page.getByRole('button',{name:'모두 바꾸기',exact:true}).click();
       await expect.poll(async()=>(await(await request.get(api+'/api/notes/'+id,{headers})).json()).content.text).toContain('"renamed"');
       await page.route('**/web-api/api/notes',route=>route.request().method()==='POST'?route.fulfill({status:409,contentType:'application/json',body:'{"error":"Synthetic revision conflict"}'}):route.continue());
       await replaceCode(page,'{"draft":"기기 보존"}');await expect(page.getByTestId('note-save-status')).toContainText('충돌');

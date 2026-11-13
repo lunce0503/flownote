@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode, type RefObject } from 'react';
-import { Copy, Hand, Lasso, Pencil, RotateCcw, ScanText, ZoomIn, ZoomOut } from 'lucide-react';
+import { Copy, Hand, Lasso, Pencil, RotateCcw, ScanText, ZoomIn, ZoomOut, Undo2, Redo2 } from 'lucide-react';
 import {
   NOTE_DRAG_DISTANCE, NOTE_HOLD_MS, NOTE_MENU_ACTIONS, NOTE_MENU_INSET,
   noteMenuCenter, noteMenuItem, noteMenuSelection,
@@ -16,7 +16,8 @@ const actions = {
 };
 type Contact = { origin: NotePoint; previous: NotePoint; moved: boolean };
 
-export default function NoteInteraction({ children, disabled, editorTools, onEdit }: {
+export default function NoteInteraction({ children, disabled, editorTools, onEdit, code = false }: {
+  code?: boolean;
   children: ReactNode;
   editorTools: RefObject<NoteTextTools | null>;
   disabled: boolean;
@@ -43,7 +44,10 @@ export default function NoteInteraction({ children, disabled, editorTools, onEdi
   const clearHold = () => { window.clearTimeout(hold.current?.timer); hold.current = null; };
   const cancel = useCallback(() => {
     window.clearTimeout(hold.current?.timer); hold.current = null;
-    contacts.current.clear(); pinch.current = null; menuRef.current = null;
+    const pointers = [...contacts.current.keys()];
+    contacts.current.clear();
+    for (const id of pointers) if (viewport.current?.hasPointerCapture(id)) viewport.current.releasePointerCapture(id);
+    pinch.current = null; menuRef.current = null;
     lassoRef.current = []; setLasso([]); setMenu(null);
   }, []);
   useEffect(() => {
@@ -94,6 +98,7 @@ export default function NoteInteraction({ children, disabled, editorTools, onEdi
     const origin = anchor ?? { x: (element.scrollLeft + point.x - bounds.left) / zoomRef.current,
       y: (element.scrollTop + point.y - bounds.top) / zoomRef.current };
     const value = Math.min(3, Math.max(0.5, next));
+    if (code) { tools()?.setZoom?.(value, point, anchor); zoomRef.current = value; setZoom(value); return; }
     pendingScroll.current = { x: origin.x * value - point.x + bounds.left, y: origin.y * value - point.y + bounds.top };
     if (value === zoomRef.current) {
       element.scrollLeft = pendingScroll.current.x; element.scrollTop = pendingScroll.current.y;
@@ -113,7 +118,7 @@ export default function NoteInteraction({ children, disabled, editorTools, onEdi
         .catch(() => setMessage('복사 권한을 확인해주세요. 선택한 범위는 유지됩니다.'));
     } else if (action === 'select-all') setSelectionLength(tools()?.selectAll().length ?? 0);
     else if (action === 'undo') { if (!disabled) tools()?.undo(); }
-    else { setTool(action); if (action === 'edit') { onEdit?.(); tools()?.focus(); } }
+    else { cancel(); setTool(action); if (action === 'edit') { onEdit?.(); tools()?.focus(); } }
   };
   const panBy = (delta: NotePoint) => {
     const element = viewport.current;
@@ -132,17 +137,19 @@ export default function NoteInteraction({ children, disabled, editorTools, onEdi
   const down = (event: PointerEvent<HTMLDivElement>) => {
     lastPointerType.current = event.pointerType;
     if (event.button !== 0 || isNativeControl(event.target as Element)) return;
+    if (tool === 'edit' && event.pointerType === 'touch') tools()?.focus();
     if (event.pointerType !== 'touch' && tool === 'edit') return;
     const point = { x: event.clientX, y: event.clientY };
     contacts.current.set(event.pointerId, { origin: point, previous: point, moved: false });
     if (contacts.current.size >= 2) {
       clearHold(); menuRef.current = null; setMenu(null); lassoRef.current = []; setLasso([]);
       const [first, second] = [...contacts.current.values()];
-      const bounds = event.currentTarget.getBoundingClientRect();
+      const bounds = (code ? editorTools.current?.scrollElement : null)?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
+      const scroll = (code ? editorTools.current?.scrollElement : null) ?? event.currentTarget;
       const center = { x: (first.previous.x + second.previous.x) / 2, y: (first.previous.y + second.previous.y) / 2 };
       pinch.current = { distance: Math.max(1, Math.hypot(first.previous.x - second.previous.x, first.previous.y - second.previous.y)),
-        zoom: zoomRef.current, anchor: { x: (event.currentTarget.scrollLeft + center.x - bounds.left) / zoomRef.current,
-          y: (event.currentTarget.scrollTop + center.y - bounds.top) / zoomRef.current } };
+        zoom: zoomRef.current, anchor: { x: (scroll.scrollLeft + center.x - bounds.left) / zoomRef.current,
+          y: (scroll.scrollTop + center.y - bounds.top) / zoomRef.current } };
       event.currentTarget.setPointerCapture(event.pointerId); block(event); return;
     }
     if (event.pointerType === 'touch') {
@@ -157,7 +164,7 @@ export default function NoteInteraction({ children, disabled, editorTools, onEdi
         element.setPointerCapture(event.pointerId);
       }, NOTE_HOLD_MS) };
     }
-    if (event.pointerType === 'touch' || tool !== 'edit') { event.currentTarget.setPointerCapture(event.pointerId); block(event); }
+    if (event.pointerType === 'touch' || tool !== 'edit') { event.currentTarget.setPointerCapture(event.pointerId); if (tool !== 'edit') block(event); }
   };
   const move = (event: PointerEvent<HTMLDivElement>) => {
     const contact = contacts.current.get(event.pointerId);
@@ -211,13 +218,17 @@ export default function NoteInteraction({ children, disabled, editorTools, onEdi
     if (event.type === 'pointerup' && selected) activate(selected);
   };
 
-  return <section className="note-interaction" data-testid="note-interaction" data-tool={tool}>
+  return <section className={`note-interaction${code ? ' note-interaction-code' : ''}`} data-testid="note-interaction" data-tool={tool}>
     <div className="note-view-tools" role="toolbar" aria-label="노트 이동과 선택 도구">
       {(['edit', 'pan', 'lasso'] as const).map(action => {
         const { Icon, label } = actions[action];
         return <button key={action} type="button" aria-label={`노트 ${label}`} aria-pressed={tool === action}
           onMouseDown={event => event.preventDefault()} onClick={() => activate(action)}><Icon size={17} /><span>{label}</span></button>;
       })}
+      {code && <>
+        <button aria-label="노트 실행 취소" disabled={disabled} onMouseDown={event => event.preventDefault()} onClick={() => tools()?.undo()}><Undo2 size={17} /></button>
+        <button aria-label="노트 다시 실행" disabled={disabled} onMouseDown={event => event.preventDefault()} onClick={() => tools()?.redo?.()}><Redo2 size={17} /></button>
+      </>}
       <button type="button" aria-label="노트 축소" onClick={() => activate('zoom-out')}><ZoomOut size={17} /></button>
       <button type="button" aria-label="노트 확대율 초기화" onClick={() => zoomTo(1)}>{Math.round(zoom * 100)}%</button>
       <button type="button" aria-label="노트 확대" onClick={() => activate('zoom-in')}><ZoomIn size={17} /></button>
@@ -229,7 +240,7 @@ export default function NoteInteraction({ children, disabled, editorTools, onEdi
       onPointerDownCapture={down} onPointerMoveCapture={move} onPointerUpCapture={up} onPointerCancelCapture={up}
       onLostPointerCapture={event => { if (event.target === event.currentTarget) up(event); }} onContextMenu={event => { if (lastPointerType.current === 'touch' && !isNativeControl(event.target as Element)) event.preventDefault(); }}
       onKeyDownCapture={event => { if (event.key === 'Escape') cancel(); }}>
-      <div ref={content} className="note-zoom-content" style={{ zoom, width: baseWidth || '100%' }}>{children}</div>
+      <div ref={content} className="note-zoom-content" style={{ zoom: code ? 1 : zoom, width: code ? '100%' : baseWidth || '100%' }}>{children}</div>
     </div>
     {lasso.length > 1 && bounds && <svg className="note-lasso-overlay" aria-hidden="true" style={{ left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height }}>
       <polygon points={lasso.map(point => `${point.x - bounds.left},${point.y - bounds.top}`).join(' ')} />

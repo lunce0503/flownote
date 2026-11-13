@@ -78,3 +78,40 @@
   .note-code-surface .cm-scroller { font-size: 15px; }
   .note-code-help { display: none; }
 }
+.note-code-options { width: 100%; }
+.note-code-options > summary { display: none; }
+.note-code-options-content { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
+.note-code-menu-copy { display: none !important; }
+.note-code-surface .cm-scroller { font-size: calc(var(--code-font-size, 14px) * var(--note-code-zoom, 1)); }
+.note-code-explorer-toggle, .note-save-icon { display: none !important; }
+.note-interaction-code .note-zoom-content { height: 100%; width: 100%; }
+.note-interaction-code .note-code-editor { flex: 1; height: 100%; min-height: 0; }
+@media (max-width: 700px) {
+  html:has(.note-document-code) .note-workspace { min-height: 0; height: 100dvh; border-radius: 0; }
+  .note-workspace:has(.note-document-code) > .note-topbar { display: none; }
+  .note-workspace:has(.note-document-code) .note-content { overflow: hidden; }
+  .note-document-code { position: relative; min-height: 0; }
+  .note-document-code > .note-document-heading { height: 58px; min-height: 58px; padding: 5px 42px 5px 4px; gap: 6px; flex-wrap: nowrap; }
+  .note-document-code .note-document-heading input { width: 0; flex: 1; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
+  .note-code-explorer-toggle { display: inline-flex !important; min-width: 36px; }
+  .note-document-code .note-save-icon { display: inline-flex !important; }
+  .note-document-code .note-save-text { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .note-document-code > .note-document-tools { position: absolute; top: 5px; right: 3px; padding: 0; border: 0; z-index: 5; }
+  .note-interaction-code { position: relative; min-height: 0; }
+  .note-interaction-code .note-view-tools { flex-wrap: nowrap; padding: 2px 38px 2px 2px; gap: 0; height: 48px; flex-shrink: 0; }
+  .note-interaction-code .note-view-tools button { min-width: 32px; width: 32px; height: 44px; padding: 2px; flex-shrink: 1; }
+  .note-interaction-code .note-view-tools button[aria-label="노트 확대율 초기화"] { min-width: 42px; }
+  .note-interaction-code .note-view-tools button span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .note-interaction-code .note-view-tools button[aria-label="노트 선택 복사"] { display: none; }
+  .note-interaction-code .note-view-status { min-height: 18px; font-size: 10px; padding: 2px 6px; }
+  .note-interaction-code .note-viewport { position: static; height: auto; min-height: 0; overflow: hidden; }
+  .note-interaction-code .note-code-toolbar { position: absolute; top: 2px; right: 2px; width: 36px; height: 44px; padding: 0; overflow: visible; max-height: none; z-index: 6; border: 0; }
+  .note-code-options > summary { display: flex; align-items: center; justify-content: center; height: 44px; }
+  .note-code-options-content { position: absolute; right: 0; top: 46px; width: min(310px, calc(100vw - 12px)); max-height: 65dvh; overflow: auto; padding: 8px; background: var(--workspace-paper); border: 1px solid var(--workspace-border); box-shadow: 0 4px 16px #0002; }
+  .note-code-options .note-code-menu-copy { display: inline-flex !important; }
+  .note-code-editor { --code-font-size: 15px; }
+  .note-code-surface, .note-code-surface .cm-editor, .note-code-surface .cm-content { min-height: 0; }
+  .note-code-status { padding: 2px 8px; font-size: 10px; }
+  html[data-installed-app="true"]:has(.note-document-code) .android-navigation { display: none; }
+  html[data-installed-app="true"]:has(.note-document-code) .App { padding-bottom: 0; }
+}

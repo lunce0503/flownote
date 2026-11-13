@@ -120,6 +120,7 @@ export function registerNoteMobileTools(engine: 'chromium' | 'webkit') {
         for (const point of points.slice(1)) await touch('touchMove', [point]);
         await touch('touchEnd', []);
         await expect(page.getByTestId('note-selection-status')).toContainText('5자 선택');
+        if (format === 'code') await page.getByLabel('코드 편집 도구 더보기', { exact: true }).click();
         await page.getByRole('button', { name: '노트 선택 복사', exact: true }).click();
         expect(await page.evaluate(() => (window as unknown as { noteTestCopied: string[] }).noteTestCopied)).toEqual(['bravo']);
         const unchanged = await read(); expect(unchanged.content).toEqual(content); expect(unchanged.revision).toBe(1);
@@ -174,6 +175,7 @@ export function registerNoteMobileTools(engine: 'chromium' | 'webkit') {
           await expect(target).toBeVisible();
           await target.press('ControlOrMeta+a'); await page.keyboard.insertText(wrappedText);
           await expect.poll(async () => (await read()).content.text).toBe(wrappedText);
+          await page.getByLabel('코드 편집 도구 더보기', { exact: true }).click();
           await page.getByRole('button', { name: '자동 줄바꿈', exact: true }).click();
           const line = page.locator('.cm-line').first();
           await expect.poll(async () => (await line.boundingBox())!.height).toBeGreaterThan(150);
@@ -186,6 +188,7 @@ export function registerNoteMobileTools(engine: 'chromium' | 'webkit') {
           await wrapTouch('touchStart', [outline[0]]);
           for (const point of outline.slice(1)) await wrapTouch('touchMove', [point]);
           await wrapTouch('touchEnd', []);
+          await page.getByLabel('코드 편집 도구 더보기', { exact: true }).click();
           await page.getByRole('button', { name: '노트 선택 복사', exact: true }).click();
           expect(await page.evaluate(() => (window as unknown as { noteTestCopied: string[] }).noteTestCopied.at(-1))).toBe(wrappedText);
           expect((await read()).content.text).toBe(wrappedText);
