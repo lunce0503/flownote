@@ -90,6 +90,14 @@ function Editor({ owner, initial, draft, draftError, onSaved, reload, registerRe
     window.addEventListener('beforeunload', beforeUnload);
     const abort = new AbortController();
     let checking = false, checkAgain = false, reviewed = false, retryAfterCheck = false;
+    const reviewRemote = async () => {
+      reviewed = true; queue.pause(); setRemoteChanged(true); setStatus('원격 변경 확인 필요');
+      if (!queue.hasPending) return;
+      try {
+        queue.capture(noteRef.current);
+        await noteDrafts.read(owner, initial.id);
+      } catch { setStatus('기기 초안 보관 실패 — 파일 내보내기를 확인하세요'); }
+    };
     const checkRemote = async () => {
       if (checking) { checkAgain = true; return; }
       checking = true;
@@ -101,13 +109,13 @@ function Editor({ owner, initial, draft, draftError, onSaved, reload, registerRe
           await queue.settled;
           if (abort.signal.aborted || getAuthUser()?.id !== owner) return;
           if ((server.revision ?? 0) > queue.revision) {
-            reviewed = true; queue.pause(); setRemoteChanged(true); setStatus('원격 변경 확인 필요');
+            await reviewRemote();
           } else if (retryAfterCheck && queue.hasPending && !queue.conflicted) queue.retry();
           retryAfterCheck = false;
         } while (checkAgain && !reviewed);
       } catch (error) {
         if (!abort.signal.aborted && getAuthUser()?.id === owner && (error as { response?: { status?: number } }).response?.status === 404) {
-          reviewed = true; queue.pause(); setRemoteChanged(true); setStatus('원격 변경 확인 필요');
+          await reviewRemote();
         }
       } finally { checking = false; }
     };

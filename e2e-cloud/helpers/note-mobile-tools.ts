@@ -67,7 +67,7 @@ export function registerNoteMobileTools(engine: 'chromium' | 'webkit') {
       test.setTimeout(150000);
       const actor = await createCloudActor(request), id = randomUUID();
       const headers = { Authorization: 'Bearer ' + actor.token };
-      const text = format === 'code' ? 'alpha bravo charlie\r\n\r\nsecond line\r\n' : 'alpha bravo charlie\n\nsecond line\n';
+      const text = format === 'code' ? 'alpha bravo charlie\r\n\r\n' + 'wide '.repeat(80) + '\r\nsecond line\r\n' : 'alpha bravo charlie\n\nsecond line\n';
       const content = format === 'code' ? { format: 'code', version: 1, language: 'plaintext', encoding: 'utf-16le', text }
         : { format: 'markdown', version: 1, markdown: text };
       const created = await request.post(api + '/api/notes', { headers, data: {
@@ -153,12 +153,13 @@ export function registerNoteMobileTools(engine: 'chromium' | 'webkit') {
         }
         const saved = await read();
         await choose('zoom-in'); await choose('zoom-in'); await choose('pan');
-        await surface.evaluate(element => { element.scrollLeft = 70; });
-        const beforePan = await surface.evaluate(element => element.scrollLeft);
+        const panSurface = format === 'code' ? page.locator('.cm-scroller') : surface;
+        await panSurface.evaluate(element => { element.scrollLeft = 70; });
+        const beforePan = await panSurface.evaluate(element => element.scrollLeft);
         const box = (await surface.boundingBox())!;
         const origin = { x: box.x + Math.min(180, box.width / 2), y: box.y + Math.min(300, box.height - 40), id: 1 };
         await touch('touchStart', [origin]); await touch('touchMove', [{ ...origin, x: origin.x + 35 }]); await touch('touchEnd', []);
-        expect(await surface.evaluate(element => element.scrollLeft)).toBeLessThan(beforePan - 20);
+        expect(await panSurface.evaluate(element => element.scrollLeft)).toBeLessThan(beforePan - 20);
         const beforePinch = Number(await surface.getAttribute('data-zoom'));
         const first = { ...origin, x: origin.x - 45 }, second = { ...origin, x: origin.x + 45, id: 2 };
         await touch('touchStart', [first]); await touch('touchStart', [first, second]);

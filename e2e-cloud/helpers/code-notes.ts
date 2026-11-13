@@ -26,7 +26,10 @@ export async function importCodeNote(page: Page, name: string, bytes: Uint8Array
   return new URL(page.url()).pathname.split('/').at(-1)!;
 }
 export async function replaceCode(page: Page, text: string) {
-  await editor(page).click(); await editor(page).press('ControlOrMeta+a'); await page.keyboard.insertText(text);
+  await editor(page).click();
+  const apple = await page.evaluate(() => /Mac/.test(navigator.platform) || /Apple Computer/.test(navigator.vendor) && /Mobile\//.test(navigator.userAgent));
+  await editor(page).press(apple ? 'Meta+a' : 'Control+a');
+  await page.keyboard.insertText(text.replaceAll('\r\n', '\n'));
 }
 async function actorPage(page: Page, request: APIRequestContext) {
   const actor = await createCloudActor(request);
