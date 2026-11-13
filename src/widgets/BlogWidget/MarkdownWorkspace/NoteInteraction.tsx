@@ -127,9 +127,10 @@ export default function NoteInteraction({ children, disabled, editorTools, onEdi
     let x = -delta.x, y = -delta.y;
     if (inner) {
       const before = { x: inner.scrollLeft, y: inner.scrollTop };
-      inner.scrollBy({ left: x / zoomRef.current, top: y / zoomRef.current, behavior: 'instant' });
-      x -= (inner.scrollLeft - before.x) * zoomRef.current;
-      y -= (inner.scrollTop - before.y) * zoomRef.current;
+      const scale = code ? 1 : zoomRef.current;
+      inner.scrollBy({ left: x / scale, top: y / scale, behavior: 'instant' });
+      x -= (inner.scrollLeft - before.x) * scale;
+      y -= (inner.scrollTop - before.y) * scale;
     }
     element.scrollLeft += x; element.scrollTop += y;
   };

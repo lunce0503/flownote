@@ -40,7 +40,9 @@ test('mobile code uses compact header and stable full-width text zoom, selection
     }
     const stored=await(await request.get(api+'/api/notes/'+id,{headers})).json();expect(stored.content.text).toBe(text);expect(stored.revision).toBe(1);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
-    await page.goto(web+'/canvas');await expect(page.getByRole('navigation',{name:'앱 기능',exact:true})).toBeVisible();
+    await page.getByRole('button',{name:'파일 탐색기 열기',exact:true}).click();
+    await page.getByRole('button',{name:'작업 공간으로 돌아가기',exact:true}).click();
+    await expect(page.getByRole('navigation',{name:'앱 기능',exact:true})).toBeVisible();
   } finally { await request.delete(api+'/api/notes/'+id,{headers});await request.post(api+'/api/users/logout-all',{headers}); }
 });
 
