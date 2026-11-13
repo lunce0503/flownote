@@ -125,7 +125,9 @@ export function registerCodeNotes(engine: string) {
       });
       await expect.poll(async () => (await (await request.get(api + '/api/notes/' + id, { headers })).json()).content.text)
         .toBe(original + '\r\n');
-      await page.getByLabel('코드 언어', { exact: true }).selectOption('typescript');
+      const language = page.getByLabel('코드 언어', { exact: true });
+      if (!await language.isVisible()) await page.getByLabel('코드 편집 도구 더보기', { exact: true }).click();
+      await language.selectOption('typescript');
       await expect.poll(async () => (await (await request.get(api + '/api/notes/' + id, { headers })).json()).content.language)
         .toBe('typescript');
       expect((await (await request.get(api + '/api/notes/' + id, { headers })).json()).content.text).toBe(original + '\r\n');
