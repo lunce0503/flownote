@@ -23,7 +23,16 @@ test('mobile code uses compact header and stable full-width text zoom, selection
       await expect.poll(async()=>Math.abs((await page.locator('.cm-editor').boundingBox())!.width-width)).toBeLessThan(2);
     }
     await page.getByLabel('코드 편집 도구 더보기',{exact:true}).click();await page.getByLabel('들여쓰기 너비',{exact:true}).selectOption('8');await page.getByLabel('코드 편집 도구 더보기',{exact:true}).click();
+    await page.getByRole('button',{name:'노트 확대율 초기화',exact:true}).click();
     const touch=await noteTouchDriver(page,'chromium');
+    const scroller=(await page.locator('.cm-scroller').boundingBox())!,center={x:scroller.x+scroller.width/2,y:scroller.y+60};
+    for(const [start,end,scale] of [[30,60,'2'],[80,20,'0.5']] as const){
+      await touch('touchStart',[{x:center.x-start,y:center.y,id:1},{x:center.x+start,y:center.y,id:2}]);
+      await touch('touchMove',[{x:center.x-end,y:center.y,id:1},{x:center.x+end,y:center.y,id:2}]);await touch('touchEnd',[]);
+      await expect(page.getByTestId('note-viewport')).toHaveAttribute('data-zoom',scale);
+      expect(Math.abs((await page.locator('.cm-editor').boundingBox())!.width-width)).toBeLessThan(2);
+    }
+    await page.getByRole('button',{name:'노트 확대율 초기화',exact:true}).click();
     for(let pass=0;pass<3;pass++) {
       await page.getByRole('button',{name:'노트 올가미',exact:true}).click();await page.getByRole('button',{name:'노트 편집',exact:true}).click();
       const box=(await editor.boundingBox())!,point={x:box.x+25,y:box.y+15,id:1};
@@ -50,13 +59,14 @@ test('reconnect revalidates revision without false review and resumes pending sa
     await expect.poll(async()=>(await(await request.get(api+'/api/notes/'+id,{headers})).json()).content.text,{timeout:30000}).toBe('offline local change');
     await expect(page.getByRole('alert').filter({hasText:'다른 창의 변경'})).toHaveCount(0);
     await page.reload();await expect(editor).toHaveText('offline local change');
-    const current=await(await request.get(api+'/api/notes/'+id,{headers})).json();
     await page.route('**/api/notes',async route=>{if(route.request().method()==='POST')await route.abort();else await route.continue();});
     await editor.press('ControlOrMeta+a');await page.keyboard.insertText('preserve this local draft');await expect(page.getByTestId('note-save-status')).toContainText('저장 실패');
-    expect((await request.post(api+'/api/notes',{headers,data:{...current,content:{...current.content,text:'real remote change'},revision:current.revision+1,client_id:randomUUID()}})).ok()).toBe(true);
-    await page.context().setOffline(true);await page.waitForTimeout(1500);await page.context().setOffline(false);
+    const other=await page.context().newPage();await other.goto(web+'/blog/'+id);
+    const remoteEditor=other.getByRole('textbox',{name:'코드 편집기',exact:true});await expect(remoteEditor).toBeVisible();
+    await remoteEditor.press('ControlOrMeta+a');await other.keyboard.insertText('real remote change');
+    await expect.poll(async()=>(await(await request.get(api+'/api/notes/'+id,{headers})).json()).content.text).toBe('real remote change');
     await expect(page.getByRole('alert').filter({hasText:'다른 창의 변경'})).toBeVisible({timeout:30000});
-    await expect(editor).toHaveText('preserve this local draft');
+    await expect(editor).toHaveText('preserve this local draft');await other.close();
     const saved=await(await request.get(api+'/api/notes/'+id,{headers})).json();expect(saved.content.text).toBe('real remote change');
     await page.getByLabel('노트 세부 설정',{exact:true}).click();const download=page.waitForEvent('download');await page.getByRole('button',{name:'파일 내보내기',exact:true}).click();expect((await download).suggestedFilename()).toBe('Reconnect.ts');
   } finally { await page.context().setOffline(false);await request.delete(api+'/api/notes/'+id,{headers});await request.post(api+'/api/users/logout-all',{headers}); }

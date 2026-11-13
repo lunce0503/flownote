@@ -230,6 +230,7 @@ function Workspace({ owner }: { owner: string }) {
       <aside id="note-explorer" ref={sidebar} className={`note-explorer ${drawer ? 'is-open' : ''}`} role={drawer && window.matchMedia('(max-width: 700px)').matches ? 'dialog' : 'complementary'} aria-modal={drawer && window.matchMedia('(max-width: 700px)').matches ? true : undefined} aria-label="노트 탐색기">
         <div className="note-explorer-heading"><span>탐색기</span><button aria-label="목록 새로고침" onClick={() => void refresh()}><RefreshCw size={15} /></button>
           <button className="note-mobile-close" onClick={() => setDrawer(false)}>닫기</button></div>
+        <button className="note-code-workspace-return" onClick={() => navigate('/canvas')}>작업 공간으로 돌아가기</button>
         {loading && <p role="status">목록 불러오는 중…</p>}
         {error && <div role="alert">{error}<button onClick={() => void refresh()}>다시 시도</button></div>}
         <div role="tree" aria-label="폴더와 노트" onKeyDown={e => {

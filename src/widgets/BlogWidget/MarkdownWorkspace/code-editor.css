@@ -115,3 +115,8 @@
   html[data-installed-app="true"]:has(.note-document-code) .android-navigation { display: none; }
   html[data-installed-app="true"]:has(.note-document-code) .App { padding-bottom: 0; }
 }
+
+.note-code-workspace-return { display: none !important; }
+@media (max-width: 700px) {
+  .note-workspace:has(.note-document-code) .note-code-workspace-return { display: flex !important; width: 100%; }
+}

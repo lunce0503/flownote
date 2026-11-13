@@ -164,7 +164,7 @@ export default function NoteInteraction({ children, disabled, editorTools, onEdi
         element.setPointerCapture(event.pointerId);
       }, NOTE_HOLD_MS) };
     }
-    if (event.pointerType === 'touch' || tool !== 'edit') { event.currentTarget.setPointerCapture(event.pointerId); if (tool !== 'edit') block(event); }
+    if (event.pointerType === 'touch' || tool !== 'edit') { event.currentTarget.setPointerCapture(event.pointerId); block(event); }
   };
   const move = (event: PointerEvent<HTMLDivElement>) => {
     const contact = contacts.current.get(event.pointerId);
