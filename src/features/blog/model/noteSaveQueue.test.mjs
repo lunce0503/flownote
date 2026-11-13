@@ -55,3 +55,13 @@ test('ack A cannot label a newer quota-failed draft B as stored on the device', 
   assert.notEqual(statuses.at(-1),'기기에 보관됨');
   assert.match(statuses.at(-1),/실패/);
 });
+
+test('409 restores pending source if another window acknowledged the shared draft key', async () => {
+  const {drafts}=setup();let calls=0;
+  const q=createNoteSaveQueue('shared',initial,async()=>{
+    calls++;await drafts.remove('shared',initial.id);throw {response:{status:409}};
+  },()=>true,()=>{},drafts);
+  q.capture({...initial,title:'local recovery'});await tick();q.retry();await q.settled;
+  assert.equal(q.conflicted,true);assert.equal((await drafts.read('shared',initial.id)).note.title,'local recovery');
+  q.retry();await q.settled;assert.equal(calls,1);q.pause();
+});

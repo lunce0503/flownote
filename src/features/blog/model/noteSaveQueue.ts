@@ -38,6 +38,16 @@ export function createNoteSaveQueue(owner: string, initial: BlockDataProps, save
       } catch (error) {
         blocked = true;
         conflict = (error as { response?: { status?: number } }).response?.status === 409;
+        if (conflict && pending && isOwner()) {
+          try {
+            const recovery = drafts.capture(owner, pending.draft.note, revision);
+            pending = recovery;
+            await recovery.persisted;
+          } catch {
+            notify('기기 보관 실패 — 파일 내보내기를 확인하세요');
+            return;
+          }
+        }
         notify(conflict ? '충돌 — 서버본 확인 후 초안을 복구하세요' : '저장 실패 — 기기 초안 또는 파일 내보내기를 확인하세요');
       } finally {
         saving = false;
