@@ -58,8 +58,11 @@ test('Android login persists, original header is absent, all feature routes rema
   await expect(page).toHaveURL(/\/$/);
   await nav.getByRole('button', { name: '전체 기능', exact: true }).click();
   const menu = page.getByRole('dialog', { name: '전체 기능' });
-  for (const href of ['/canvas', '/library', '/planner', '/social', '/agent', '/settings', '/stocks', '/banpick', '/screw-puzzle', '/magic', '/admin/canvas', '/admin/feedback']) {
+  for (const href of ['/canvas', '/library', '/planner', '/social', '/agent', '/settings', '/admin/canvas', '/admin/feedback']) {
     await expect(menu.locator(`a[href="${href}"]`)).toBeVisible();
+  }
+  for (const href of ['/stocks', '/banpick', '/screw-puzzle', '/magic']) {
+    await expect(menu.locator(`a[href="${href}"]`)).toHaveCount(0);
   }
   await menu.getByRole('link', { name: '설정', exact: true }).click();
   await expect(page).toHaveURL(/\/settings$/);
