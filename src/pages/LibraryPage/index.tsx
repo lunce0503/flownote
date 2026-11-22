@@ -120,7 +120,7 @@ function Bookshelf({ owner }: { owner: string }) {
   return <main className="workspace-surface textbook-library">
     <div className="library-shell">
       <aside className="library-sidebar" aria-label="책장 분류">
-        <div className="library-brand"><Library size={24} /><span>나의 서재<small>FLOWNOTE LIBRARY</small></span></div>
+        <div className="library-brand"><Library size={24} /><span>나의 서재<small>fot LIBRARY</small></span></div>
         <nav><button aria-pressed={!subject && !onlyFavorites} onClick={() => { setSubject(''); setOnlyFavorites(false); }}><BookOpen size={17} />모든 책<span>{books.length}</span></button>
           <button aria-pressed={onlyFavorites} onClick={() => { setOnlyFavorites(value => !value); setSubject(''); }}><Star size={17} />즐겨찾는 책<span>{books.filter(book => book.favorite).length}</span></button></nav>
         <p className="library-eyebrow">분야별 칸막이</p>

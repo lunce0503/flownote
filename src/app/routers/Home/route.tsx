@@ -45,7 +45,7 @@ const Home = () => {
         <main className="min-h-screen bg-amber-50 text-stone-900">
             <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
                 <section className="border-b border-stone-200 pb-8">
-                    <p className="text-sm font-semibold text-amber-700">Flownote</p>
+                    <p className="text-sm font-semibold text-amber-700">fot</p>
                     <h1 className="mt-3 max-w-3xl text-3xl font-bold text-stone-900 sm:text-4xl">
                         작업을 선택하세요
                     </h1>

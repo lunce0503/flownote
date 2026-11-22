@@ -53,7 +53,7 @@ const SignUpWidget= () => {
                 <div className="p-3 bg-stone-800 rounded-2xl shadow-lg">
                     <Notebook className="text-amber-50" size={32} />
                 </div>
-                <h1 className="text-3xl font-mono font-bold text-stone-800">Flownote</h1>
+                <h1 className="text-3xl font-mono font-bold text-stone-800">fot</h1>
                 <p className="text-stone-600 text-sm">생각의 흐름을 기록하세요</p>
             </div>
 
@@ -183,7 +183,7 @@ const SignUpWidget= () => {
             </div>
 
             <div className="mt-8 text-stone-400 text-xs font-mono">
-                © 2026 Flownote Inc. All rights reserved.
+                © 2026 fot All rights reserved.
             </div>
         </div>
     );

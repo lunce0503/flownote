@@ -46,7 +46,7 @@ const workflowStages: WorkflowStage[] = [
 ];
 
 const buildImprovementPrompt = (request: string) => [
-    "다음 개선 요청을 Flownote 워크스페이스에 적용할 실행 안건으로 바꿔줘.",
+    "다음 개선 요청을 fot 워크스페이스에 적용할 실행 안건으로 바꿔줘.",
     "반드시 계획, 작성, 점검, 정리 단계로 나누고 각 단계마다 수정 대상, 확인 방법, 다음 행동을 제시해줘.",
     "",
     "[개선 요청]",

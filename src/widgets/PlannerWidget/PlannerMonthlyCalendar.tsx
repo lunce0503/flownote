@@ -71,7 +71,7 @@ const PlannerMonthlyCalendar = ({ selectedDate, scheduleItems, tasks, diaryDates
       if (event) events.push(event);
     });
 
-    const ics = eventsToIcs(events, `Flownote ${cursor.year}-${String(cursor.month + 1).padStart(2, "0")}`);
+    const ics = eventsToIcs(events, `fot ${cursor.year}-${String(cursor.month + 1).padStart(2, "0")}`);
     const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
     void downloadBlob(`flownote-${cursor.year}-${String(cursor.month + 1).padStart(2, "0")}.ics`, blob);
   };

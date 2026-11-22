@@ -53,15 +53,10 @@ export const getRouteDocumentTitle = (pathname: string): [string, string?] => {
   if (pathname === "/planner") return ["플래너", new Date().toISOString().slice(0, 10)];
   if (pathname.startsWith("/social")) return ["소셜", "대화"];
   if (pathname.startsWith("/agent")) return ["AI 에이전트", "작업공간"];
-  if (pathname.startsWith("/stocks/chart")) return ["주식", "차트"];
-  if (pathname.startsWith("/stocks")) return ["주식", "대시보드"];
   if (pathname.startsWith("/settings")) return ["설정", "계정"];
   if (pathname.startsWith("/admin/canvas")) return ["캔버스 관리", "목록"];
   if (pathname.startsWith("/admin/feedback")) return ["피드백 관리", "목록"];
   if (pathname.startsWith("/login")) return ["로그인"];
   if (pathname.startsWith("/signup")) return ["회원가입"];
-  if (pathname.startsWith("/banpick")) return ["밴픽", "도구"];
-  if (pathname.startsWith("/screw-puzzle")) return ["나사 퍼즐", "게임"];
-  if (pathname.startsWith("/magic")) return ["Magic", "도구"];
   return ["홈"];
 };

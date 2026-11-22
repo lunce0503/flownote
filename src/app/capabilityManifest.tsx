@@ -20,17 +20,12 @@ const routes = {
   agent: lazyRoute(() => import('./routers/Agent/index.tsx')),
   login: lazyRoute(() => import('./routers/Login/route.tsx')),
   signup: lazyRoute(() => import('./routers/SignUp/routes.tsx')),
-  banpick: lazyRoute(() => import('./routers/LolBanpick/route.tsx')),
-  screwPuzzle: lazyRoute(() => import('./routers/ScrewPuzzle/route.tsx')),
   canvas: lazyRoute(() => import('./routers/Canvas/route.tsx')),
   canvasList: lazyRoute(() => import('./routers/Canvas/list.tsx')),
   planner: lazyRoute(() => import('./routers/Planner/route.tsx')),
-  stocks: lazyRoute(() => import('./routers/Stock/route.tsx')),
-  stockChart: lazyRoute(() => import('./routers/Stock/chart.tsx')),
   settings: lazyRoute(() => import('./routers/Settings/route.tsx')),
   adminCanvas: lazyRoute(() => import('./routers/AdminCanvas/route.tsx')),
   adminFeedback: lazyRoute(() => import('./routers/AdminFeedback/route.tsx')),
-  magic: lazyRoute(() => import('./routers/Magic/magic.tsx')),
 };
 
 // 하나의 라우트 노드. index 라우트, 또는 children을 가진 부모 라우트를 표현한다.
@@ -115,18 +110,6 @@ export const capabilityManifest: Capability[] = [
     routes: [{ path: '/planner', element: routes.planner }],
   },
   {
-    id: 'stocks',
-    label: '주식',
-    stage: 'development',
-    nav: false,
-    enabled: true,
-    protected: true,
-    routes: [
-      { path: '/stocks', element: routes.stocks },
-      { path: '/stocks/chart', element: routes.stockChart },
-    ],
-  },
-  {
     id: 'social',
     label: '소셜',
     nav: true,
@@ -141,30 +124,6 @@ export const capabilityManifest: Capability[] = [
     enabled: true,
     protected: true,
     routes: [{ path: '/agent', element: routes.agent }],
-  },
-  {
-    id: 'banpick',
-    label: '밴픽',
-    stage: 'development',
-    nav: false,
-    enabled: true,
-    routes: [{ path: '/banpick', element: routes.banpick }],
-  },
-  {
-    id: 'screw-puzzle',
-    label: '나사 퍼즐',
-    stage: 'development',
-    nav: false,
-    enabled: true,
-    routes: [{ path: '/screw-puzzle', element: routes.screwPuzzle }],
-  },
-  {
-    id: 'magic',
-    label: 'Magic',
-    stage: 'development',
-    nav: false,
-    enabled: true,
-    routes: [{ path: '/magic', element: routes.magic }],
   },
   {
     id: 'settings',

@@ -111,12 +111,12 @@ const escapeIcsText = (value: string) => (
  * 안드로이드/iOS 기본 캘린더 앱이 그대로 가져올 수 있는 표준 형식이며,
  * 추후 네이티브 앱에서 동기화를 구현할 때도 동일한 uid/RRULE 규칙을 재사용한다.
  */
-export const eventsToIcs = (events: PlannerCalendarEvent[], calendarName = "Flownote Planner") => {
+export const eventsToIcs = (events: PlannerCalendarEvent[], calendarName = "fot Planner") => {
   const stamp = toIcsLocal(new Date());
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Flownote//Planner//KO",
+    "PRODID:-//fot//Planner//KO",
     "CALSCALE:GREGORIAN",
     `X-WR-CALNAME:${escapeIcsText(calendarName)}`,
   ];

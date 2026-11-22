@@ -48,7 +48,7 @@ const AppRoutes = () => {
   const { isFullscreen } = useFullscreen();
   const [titleFeature, titleDetail] = getRouteDocumentTitle(location.pathname);
   useDocumentTitle(titleFeature, titleDetail, 0);
-  // 전체 화면(전체로 보기) 중에는 브라우저 UI와 함께 Flownote 헤더도 숨긴다.
+  // 전체 화면(전체로 보기) 중에는 브라우저 UI와 함께 fot 헤더도 숨긴다.
   const shouldShowHeader = !isInstalledApp && !isFullscreen && !["/login", "/signup"].includes(location.pathname);
 
   return (

@@ -1,4 +1,4 @@
-# Flownote Frontend FSD
+# fot Frontend FSD
 
 `src`는 Feature-Sliced Design 레이어를 기준으로 관리한다.
 

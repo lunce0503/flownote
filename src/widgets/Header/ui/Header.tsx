@@ -12,14 +12,10 @@ import {
   User,
   Bot,
   Palette,
-  TrendingUp,
   Settings,
   Activity,
   MessageSquare,
-  Puzzle,
   Ellipsis,
-  Sparkles,
-  Trophy,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/features/auth";
@@ -54,11 +50,6 @@ export default function Header({ isCapabilityVisible }: HeaderProps) {
       agent: "에이전트",
       canvas: "작업 공간",
       task: "플래너",
-      stocks: "주식",
-      puzzle: "퍼즐",
-      stockChart: "주식 차트",
-      banpick: "밴픽",
-      magic: "Magic",
       settings: "설정",
       more: "기타",
       login: "로그인",
@@ -75,11 +66,6 @@ export default function Header({ isCapabilityVisible }: HeaderProps) {
       agent: "Agent",
       canvas: "Workspace",
       task: "Planner",
-      stocks: "Stocks",
-      puzzle: "Puzzle",
-      stockChart: "Stock Chart",
-      banpick: "Banpick",
-      magic: "Magic",
       settings: "Settings",
       more: "Etc",
       login: "Login",
@@ -203,11 +189,6 @@ export default function Header({ isCapabilityVisible }: HeaderProps) {
     { capabilityId: "social", name: labels.social, href: "/social", icon: <Users size={22} /> },
     { capabilityId: "agent", name: labels.agent, href: "/agent", icon: <Bot size={22} /> },
     { capabilityId: "planner", name: labels.task, href: "/planner", icon: <CheckSquare size={22} /> },
-    { capabilityId: "stocks", name: labels.stocks, href: "/stocks", icon: <TrendingUp size={22} /> },
-    { capabilityId: "stocks", name: labels.stockChart, href: "/stocks/chart", icon: <TrendingUp size={22} /> },
-    { capabilityId: "screw-puzzle", name: labels.puzzle, href: "/screw-puzzle", icon: <Puzzle size={22} /> },
-    { capabilityId: "banpick", name: labels.banpick, href: "/banpick", icon: <Trophy size={22} /> },
-    { capabilityId: "magic", name: labels.magic, href: "/magic", icon: <Sparkles size={22} /> },
     { capabilityId: "settings", name: labels.settings, href: "/settings", icon: <Settings size={22} /> },
     ...(user?.role === "ADMIN" ? [
       { capabilityId: "admin-canvas", name: labels.admin, href: "/admin/canvas", icon: <Activity size={22} /> },
@@ -223,7 +204,6 @@ export default function Header({ isCapabilityVisible }: HeaderProps) {
     { capabilityId: "social", name: labels.social, href: "/social", icon: <Users size={18} /> },
     { capabilityId: "agent", name: labels.agent, href: "/agent", icon: <Bot size={18} /> },
     { capabilityId: "planner", name: labels.task, href: "/planner", icon: <CheckSquare size={18} /> },
-    { capabilityId: "stocks", name: labels.stocks, href: "/stocks", icon: <TrendingUp size={18} /> },
     { capabilityId: "settings", name: labels.settings, href: "/settings", icon: <Settings size={18} /> },
     ...(user?.role === "ADMIN" ? [
       { capabilityId: "admin-canvas", name: labels.admin, href: "/admin/canvas", icon: <Activity size={18} /> },
@@ -257,7 +237,7 @@ export default function Header({ isCapabilityVisible }: HeaderProps) {
                 />
               </div>
               <span className="hidden text-2xl font-black text-white transition-colors group-hover:text-amber-200 md:inline">
-                Flownote
+                fot
               </span>
             </Link>
 
@@ -417,7 +397,7 @@ export default function Header({ isCapabilityVisible }: HeaderProps) {
           <div className="flex items-center justify-between mb-8 border-b border-stone-200 pb-4">
             <div className="flex items-center gap-2">
               <Notebook className="text-stone-800" size={24} />
-              <span className="text-xl font-mono font-bold text-stone-800">Flownote</span>
+              <span className="text-xl font-mono font-bold text-stone-800">fot</span>
             </div>
             <button 
               ref={sidebarCloseButtonRef}
@@ -488,7 +468,7 @@ export default function Header({ isCapabilityVisible }: HeaderProps) {
 
           {/* Sidebar Footer */}
           <div className="mt-auto pt-6 text-stone-400 text-xs font-mono">
-            v1.0.0 @ Flownote
+            v1.0.0 @ fot
           </div>
         </div>
       </aside>
