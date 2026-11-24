@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
-import { Bot, CalendarDays, Grid2X2, House, Library, X } from 'lucide-react';
+import { Bot, CalendarDays, Grid2X2, House, Library, Terminal, X } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { useFullscreen } from '@/shared/lib/useFullscreen';
 import { capabilityManifest } from './capabilityManifest';
@@ -12,6 +12,8 @@ const primary = [
   { path: '/library', label: '책장', icon: Library },
   { path: '/planner', label: '플래너', icon: CalendarDays },
 ];
+const hasNativeTerminal = typeof navigator !== 'undefined'
+  && /(?:^|\s)FotRemoteTerminal\/1(?:\s|$)/.test(navigator.userAgent);
 
 export default function AndroidNavigation() {
   const { pathname } = useLocation();
@@ -78,6 +80,9 @@ export default function AndroidNavigation() {
               <span>{item.label}{item.stage === 'development' && <small>개발 중</small>}</span>
             </Link> : null;
           })}
+          {hasNativeTerminal && <a href="/__flownote_native__/remote-terminal" onClick={() => setMenuOpen(false)}>
+            <Terminal size={20} aria-hidden="true" /><span>원격 터미널</span>
+          </a>}
         </div>
         <button type="button" className="android-logout" onClick={() => {
           void logout().then(() => setMenuOpen(false)).catch(() => window.alert("로그아웃하지 못했습니다. 다시 시도해주세요."));
