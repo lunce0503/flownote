@@ -64,6 +64,21 @@ test('Android login persists, original header is absent, all feature routes rema
   for (const href of ['/stocks', '/banpick', '/screw-puzzle', '/magic']) {
     await expect(menu.locator(`a[href="${href}"]`)).toHaveCount(0);
   }
+  await expect(menu.getByRole('link', { name: '원격 터미널', exact: true })).toHaveCount(0);
+  const capableContext = await page.context().browser()!.newContext({
+    userAgent: androidUA + ' FotRemoteTerminal/1', viewport: { width: 412, height: 915 },
+    isMobile: true, hasTouch: true,
+    storageState: await page.context().storageState(),
+  });
+  try {
+    const capablePage = await capableContext.newPage();
+    await capablePage.goto(new URL('/', page.url()).href);
+    await capablePage.getByRole('button', { name: '전체 기능', exact: true }).click();
+    await expect(capablePage.getByRole('link', { name: '원격 터미널', exact: true }))
+      .toHaveAttribute('href', '/__flownote_native__/remote-terminal');
+  } finally {
+    await capableContext.close();
+  }
   await menu.getByRole('link', { name: '설정', exact: true }).click();
   await expect(page).toHaveURL(/\/settings$/);
   await expect(page.locator('header')).toHaveCount(0);
