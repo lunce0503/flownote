@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { BookOpen, Bot, CheckSquare, PenLine, Search } from "lucide-react";
+import { BookOpen, CheckSquare, PenLine, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const destinations = [
@@ -18,14 +18,6 @@ const destinations = [
         href: "/planner",
         icon: CheckSquare,
     },
-    {
-        label: "AI 에이전트",
-        description: "노트와 작업을 바탕으로 대화",
-        keywords: "AI 요약 자동화 대화",
-        href: "/agent",
-        icon: Bot,
-    },
-
 ];
 
 const Home = () => {
@@ -50,7 +42,7 @@ const Home = () => {
                         작업을 선택하세요
                     </h1>
                     <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base">
-                        노트, 일정, 대화, 캔버스 중 이어서 작업할 기능을 찾을 수 있습니다.
+                        노트, 일정, 책장, 캔버스 중 이어서 작업할 기능을 찾을 수 있습니다.
                     </p>
 
                     <label className="relative mt-6 block max-w-2xl">

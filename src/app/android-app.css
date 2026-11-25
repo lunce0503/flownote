@@ -30,6 +30,7 @@ html[data-installed-app="true"] :focus-visible { outline: 2px solid #171714; out
 .android-menu-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .android-menu-grid a { display: flex; align-items: center; gap: 10px; min-height: 66px; padding: 12px; border: 1px solid #ded9cc; border-radius: 14px; background: #faf8f0; color: #171714; text-decoration: none; }
 .android-menu-grid small { display: block; font-size: 10px; color: #706b60; }
+.android-menu-grid [aria-current="page"] { background: #e9e0ce; border-color: #c8bea8; }
 .android-logout { width: 100%; margin-top: 20px; min-height: 48px; border-radius: 12px; background: #171714; color: #f7f3e8; }
 .android-editor-library { position: fixed; bottom: 72px; right: 12px; z-index: 800; display: grid; place-items: center; width: 44px; height: 44px; background: #171714; color: #f7f3e8; border-radius: 12px; }
 /* The reader owns the top-right close control; restore library navigation on close. */

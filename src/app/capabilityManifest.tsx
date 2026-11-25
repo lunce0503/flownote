@@ -120,7 +120,7 @@ export const capabilityManifest: Capability[] = [
   {
     id: 'agent',
     label: 'AI 에이전트',
-    nav: true,
+    nav: false,
     enabled: true,
     protected: true,
     routes: [{ path: '/agent', element: routes.agent }],

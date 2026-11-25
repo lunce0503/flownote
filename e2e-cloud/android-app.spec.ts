@@ -58,10 +58,10 @@ test('Android login persists, original header is absent, all feature routes rema
   await expect(page).toHaveURL(/\/$/);
   await nav.getByRole('button', { name: '전체 기능', exact: true }).click();
   const menu = page.getByRole('dialog', { name: '전체 기능' });
-  for (const href of ['/canvas', '/library', '/planner', '/social', '/agent', '/settings', '/admin/canvas', '/admin/feedback']) {
+  for (const href of ['/canvas', '/library', '/planner', '/social', '/settings', '/admin/canvas', '/admin/feedback']) {
     await expect(menu.locator(`a[href="${href}"]`)).toBeVisible();
   }
-  for (const href of ['/stocks', '/banpick', '/screw-puzzle', '/magic']) {
+  for (const href of ['/stocks', '/banpick', '/screw-puzzle', '/magic', '/agent']) {
     await expect(menu.locator(`a[href="${href}"]`)).toHaveCount(0);
   }
   await expect(menu.getByRole('link', { name: '원격 터미널', exact: true })).toHaveCount(0);
@@ -81,6 +81,10 @@ test('Android login persists, original header is absent, all feature routes rema
   }
   await menu.getByRole('link', { name: '설정', exact: true }).click();
   await expect(page).toHaveURL(/\/settings$/);
+  await expect(page.getByRole('heading', { name: '설정', exact: true })).toBeVisible();
+  await nav.getByRole('button', { name: '전체 기능', exact: true }).click();
+  await expect(menu.getByRole('link', { name: '설정', exact: true })).toHaveAttribute('aria-current', 'page');
+  await menu.getByRole('button', { name: '전체 기능 닫기', exact: true }).click();
   await expect(page.locator('header')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
   await nav.getByRole('button', { name: '전체 기능', exact: true }).click();

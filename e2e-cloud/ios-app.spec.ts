@@ -22,10 +22,10 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1024, height: 1366
     expect(await page.locator('body').evaluate(e => getComputedStyle(e).backgroundColor)).toBe('rgb(247, 243, 232)');
     await page.getByRole('button', { name: '전체 기능', exact: true }).click();
     const menu = page.getByRole('dialog', { name: '전체 기능' });
-    for (const href of ['/canvas', '/library', '/planner', '/social', '/agent', '/settings', '/admin/canvas', '/admin/feedback']) {
+    for (const href of ['/canvas', '/library', '/planner', '/social', '/settings', '/admin/canvas', '/admin/feedback']) {
       await expect(menu.locator(`a[href="${href}"]`)).toBeVisible();
     }
-    for (const href of ['/stocks', '/banpick', '/screw-puzzle', '/magic']) {
+    for (const href of ['/stocks', '/banpick', '/screw-puzzle', '/magic', '/agent']) {
       await expect(menu.locator(`a[href="${href}"]`)).toHaveCount(0);
     }
     await menu.getByRole('link', { name: '설정', exact: true }).click();

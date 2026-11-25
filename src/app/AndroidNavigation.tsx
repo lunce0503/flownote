@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
-import { Bot, CalendarDays, Grid2X2, House, Library, Terminal, X } from 'lucide-react';
+import { CalendarDays, Grid2X2, House, Library, Settings, Terminal, X } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { useFullscreen } from '@/shared/lib/useFullscreen';
 import { capabilityManifest } from './capabilityManifest';
@@ -73,10 +73,10 @@ export default function AndroidNavigation() {
           <button autoFocus data-android-menu-close type="button" aria-label="전체 기능 닫기" onClick={() => setMenuOpen(false)}><X size={22} /></button>
         </div>
         <div className="android-menu-grid">
-          {capabilityManifest.filter(item => item.enabled && item.id !== 'auth' && item.id !== 'home' && item.id !== 'blog').map(item => {
+          {capabilityManifest.filter(item => item.enabled && item.nav).map(item => {
             const path = item.routes.find(route => route.path && !route.path.includes(':'))?.path;
-            return path ? <Link key={item.id} to={path} onClick={() => setMenuOpen(false)}>
-              {item.id === 'agent' ? <Bot size={20} /> : <Grid2X2 size={20} />}
+            return path ? <Link key={item.id} to={path} aria-current={pathname === path ? 'page' : undefined} onClick={() => setMenuOpen(false)}>
+              {item.id === 'settings' ? <Settings size={20} aria-hidden="true" /> : <Grid2X2 size={20} aria-hidden="true" />}
               <span>{item.label}{item.stage === 'development' && <small>개발 중</small>}</span>
             </Link> : null;
           })}

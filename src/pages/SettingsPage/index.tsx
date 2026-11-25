@@ -41,7 +41,7 @@ const OptionButton = ({
     onClick={onClick}
     className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-bold transition-colors ${
       active
-        ? "border-emerald-600 bg-emerald-600 text-white"
+        ? "border-stone-900 bg-stone-900 text-white"
         : "border-stone-200 bg-white text-stone-700 hover:bg-stone-100"
     }`}
   >
@@ -73,7 +73,7 @@ const ToggleRow = ({
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={`flex h-8 w-14 shrink-0 items-center rounded-full p-1 transition-colors ${
-        checked ? "justify-end bg-emerald-600" : "justify-start bg-stone-300"
+        checked ? "justify-end bg-stone-900" : "justify-start bg-stone-300"
       }`}
     >
       <span className="h-6 w-6 rounded-full bg-white shadow" />
@@ -163,15 +163,14 @@ const SettingsPage = () => {
   };
 
   return (
-    <main className="min-h-[calc(100vh-56px)] bg-stone-950 p-3 text-stone-900 md:p-5">
-      <section data-testid="settings-panel" className="mx-auto w-full max-w-[1440px] rounded-2xl border border-stone-200 bg-stone-50 p-4 shadow-xl md:p-8">
-        <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+    <main className="min-h-[calc(100dvh-56px)] bg-amber-50 px-4 py-6 text-stone-900 sm:px-6 lg:px-8">
+      <section data-testid="settings-panel" className="mx-auto w-full max-w-[1440px]">
+        <div className="mb-6 flex flex-col gap-3 border-b border-stone-200 pb-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase text-emerald-700">Preferences</p>
             <h1 className="text-2xl font-black text-stone-950 md:text-3xl">설정</h1>
             <p className="text-sm text-stone-500">화면 표시, 사용 편의, 고객센터 정보를 한 곳에서 관리합니다.</p>
           </div>
-          <div className="rounded-full bg-white px-4 py-2 text-sm font-bold text-stone-600 shadow-sm">
+          <div className="self-start text-sm font-semibold text-stone-600 md:self-auto">
             {user?.nickname ?? "사용자"} 계정
           </div>
         </div>
@@ -182,7 +181,7 @@ const SettingsPage = () => {
             {isInstalledApp && user && <DeviceSyncSettings />}
             <section className="rounded-2xl border border-stone-200 bg-white p-4">
               <div className="mb-4 flex items-center gap-2">
-                <UserRound size={20} className="text-emerald-700" />
+                <UserRound size={20} className="text-stone-700" />
                 <h2 className="text-lg font-black text-stone-950">내 프로필</h2>
               </div>
               <form className="grid gap-3" onSubmit={async (event) => {
@@ -206,18 +205,18 @@ const SettingsPage = () => {
                     <input required type={key === 'email' ? 'email' : 'text'} maxLength={key === 'email' ? 254 : 80}
                       value={profile[key]} disabled={profileStatus === "saving"}
                       onChange={(event) => { setProfileDraft({ ...profile, [key]: event.target.value }); setProfileStatus("idle"); }}
-                      className="min-h-11 min-w-0 rounded-lg border border-stone-300 bg-white px-3 font-normal focus:ring-2 focus:ring-emerald-600" />
+                      className="min-h-11 min-w-0 rounded-lg border border-stone-300 bg-white px-3 font-normal focus:ring-2 focus:ring-stone-500" />
                   </label>
                 ))}
                 {profile.email.trim() !== user?.email && (
                   <label className="grid gap-1 text-sm font-bold">현재 비밀번호 (이메일 변경 확인)
                     <input required type="password" autoComplete="current-password" maxLength={200} value={profile.currentPassword}
                       onChange={(event) => setProfileDraft({ ...profile, currentPassword: event.target.value })}
-                      className="min-h-11 rounded-lg border border-stone-300 px-3 font-normal" />
+                      className="min-h-11 min-w-0 rounded-lg border border-stone-300 px-3 font-normal" />
                   </label>
                 )}
                 <button type="submit" disabled={isDeviceOnly() || !user || profileStatus === "saving" || !profile.username.trim() || !profile.nickname.trim()}
-                  className="min-h-11 rounded-lg bg-emerald-600 px-4 font-bold text-white disabled:opacity-50">
+                  className="min-h-11 rounded-lg bg-stone-900 px-4 font-bold text-white disabled:opacity-50">
                   {profileStatus === "saving" ? "저장 중…" : "프로필 저장"}
                 </button>
                 {profileStatus === "saved" && <p role="status" className="text-sm text-emerald-700">프로필이 저장되었습니다.</p>}
@@ -226,7 +225,7 @@ const SettingsPage = () => {
             </section>
             <section className="rounded-2xl border border-stone-200 bg-white p-4">
               <div className="mb-4 flex items-center gap-2">
-                <Settings size={20} className="text-emerald-700" />
+                <Settings size={20} className="text-stone-700" />
                 <h2 className="text-lg font-black text-stone-950">화면 모드</h2>
               </div>
               {isInstalledApp ? <p className="text-sm text-stone-600">아이보리와 검정 색상의 앱 테마를 사용합니다.</p> : <div className="grid gap-2 sm:grid-cols-2">
@@ -243,7 +242,7 @@ const SettingsPage = () => {
 
             <section className="rounded-2xl border border-stone-200 bg-white p-4">
               <div className="mb-4 flex items-center gap-2">
-                <Languages size={20} className="text-emerald-700" />
+                <Languages size={20} className="text-stone-700" />
                 <h2 className="text-lg font-black text-stone-950">언어</h2>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
@@ -258,7 +257,7 @@ const SettingsPage = () => {
 
             <section className="rounded-2xl border border-stone-200 bg-white p-4">
               <div className="mb-4 flex items-center gap-2">
-                <Type size={20} className="text-emerald-700" />
+                <Type size={20} className="text-stone-700" />
                 <h2 className="text-lg font-black text-stone-950">보기 편의</h2>
               </div>
               <div className="mb-4 grid gap-2 sm:grid-cols-2">
@@ -293,14 +292,14 @@ const SettingsPage = () => {
 
             <section className="rounded-2xl border border-stone-200 bg-white p-4">
               <div className="mb-4 flex items-center gap-2">
-                <MessageSquare size={20} className="text-emerald-700" />
+                <MessageSquare size={20} className="text-stone-700" />
                 <h2 className="text-lg font-black text-stone-950">사용자 피드백</h2>
               </div>
               <div className="grid gap-3">
                 <label className="space-y-1">
                   <span className="text-xs font-bold text-stone-500">어떤 부분이 어려웠나요?</span>
                   <select
-                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:bg-white"
+                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm outline-none focus:border-stone-500 focus:bg-white"
                     value={feedback.category}
                     onChange={(event) => setFeedback((prev) => ({ ...prev, category: event.target.value }))}
                   >
@@ -312,7 +311,7 @@ const SettingsPage = () => {
                 <label className="space-y-1">
                   <span className="text-xs font-bold text-stone-500">내용</span>
                   <textarea
-                    className="min-h-32 w-full resize-y rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:bg-white"
+                    className="min-h-32 w-full resize-y rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm outline-none focus:border-stone-500 focus:bg-white"
                     value={feedback.message}
                     onChange={(event) => setFeedback((prev) => ({ ...prev, message: event.target.value }))}
                     placeholder="이용하면서 어려웠던 부분이나 개선되었으면 하는 점을 적어주세요."
@@ -321,7 +320,7 @@ const SettingsPage = () => {
                 <label className="space-y-1">
                   <span className="text-xs font-bold text-stone-500">연락처 선택 입력</span>
                   <input
-                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:bg-white"
+                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm outline-none focus:border-stone-500 focus:bg-white"
                     value={feedback.contact}
                     onChange={(event) => setFeedback((prev) => ({ ...prev, contact: event.target.value }))}
                     placeholder="답변을 받을 이메일 또는 연락처"
@@ -332,7 +331,7 @@ const SettingsPage = () => {
                     type="button"
                     onClick={() => { void submitFeedback(); }}
                     disabled={isDeviceOnly() || !feedback.message.trim() || feedbackStatus === "sending"}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-stone-300"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-stone-900 px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-stone-300"
                   >
                     <ClipboardList size={18} />
                     {feedbackStatus === "sending" ? "보내는 중…" : "피드백 보내기"}
@@ -373,7 +372,7 @@ const SettingsPage = () => {
           <aside className="space-y-4">
             <section className="rounded-2xl border border-stone-200 bg-white p-4">
               <div className="mb-4 flex items-center gap-2">
-                <HelpCircle size={20} className="text-emerald-700" />
+                <HelpCircle size={20} className="text-stone-700" />
                 <h2 className="text-lg font-black text-stone-950">고객센터</h2>
               </div>
               <div className="space-y-3 text-sm text-stone-600">
@@ -388,12 +387,12 @@ const SettingsPage = () => {
               </div>
             </section>
 
-            <section className="rounded-2xl border border-stone-200 bg-stone-900 p-4 text-white">
+            <section className="rounded-2xl border border-stone-200 bg-white p-4 text-stone-950">
               <div className="mb-3 flex items-center gap-2">
                 <ShieldCheck size={20} />
                 <h2 className="text-lg font-black">저장 방식</h2>
               </div>
-              <p className="text-sm text-stone-300">
+              <p className="text-sm text-stone-600">
                 화면 설정은 현재 브라우저에 저장됩니다. 다른 기기에서는 각 기기별로 다시 설정할 수 있습니다.
               </p>
             </section>
